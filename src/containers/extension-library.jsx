@@ -4,10 +4,14 @@ import React from 'react';
 import VM from 'scratch-vm';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
 
+import log from '../lib/log.js';
+
 import extensionLibraryContent from '../lib/libraries/extensions/index.jsx';
 
 import LibraryComponent from '../components/library/library.jsx';
 import extensionIcon from '../components/action-menu/icon--sprite.svg';
+
+import {prompt, confirm, alert} from '../lib/async-modal.jsx';
 
 const messages = defineMessages({
     extensionTitle: {
@@ -17,33 +21,117 @@ const messages = defineMessages({
     },
     extensionUrl: {
         defaultMessage: 'Enter the URL of the extension',
-        description: 'Prompt for unoffical extension url',
+        description: 'Prompt for unofficial extension url',
         id: 'gui.extensionLibrary.extensionUrl'
+    },
+    confirmReplacing: {
+        defaultMessage: 'Do you want to replace extension\n\nextension name: {name}\nload from: {url}',
+        description: 'Confirm for replacing of the extension',
+        id: 'gui.extensionLibrary.confirmReplacingExtension'
+    },
+    couldNotLoadExtension: {
+        defaultMessage: 'Could not load extension from: ',
+        description: 'Error message when extension could not be loaded',
+        id: 'gui.extensionLibrary.couldNotLoadExtension'
     }
 });
+
+// Workaround to avoid official translation process.
+const translations = {
+    'ja': {
+        'gui.extensionLibrary.confirmReplacingExtension': '拡張機能を置き換えますか?\n\n拡張機能名: {name}\n読み込み元: {url}',
+        'gui.extensionLibrary.couldNotLoadExtension': '拡張機能をロードできませんでした: {url}'
+    },
+    'ja-Hira': {
+        'gui.extensionLibrary.confirmReplacingExtension': 'かくちょうきのうをおきかえますか?\n\nかくちょうきのうめい: {name}\nよみこみもと: {url}',
+        'gui.extensionLibrary.couldNotLoadExtension': 'かくちょうきのうをロードできませんでした: {url}'
+    }
+};
 
 class ExtensionLibrary extends React.PureComponent {
     constructor (props) {
         super(props);
+        extensionLibraryContent.forEach(extension => {
+            if (extension.setFormatMessage) {
+                extension.setFormatMessage(this.props.intl.formatMessage);
+            }
+            if (extension.translationMap) {
+                Object.assign(
+                    this.props.intl.messages,
+                    extension.translationMap[this.props.intl.locale]
+                );
+            }
+        });
         bindAll(this, [
             'handleItemSelect'
         ]);
     }
     handleItemSelect (item) {
-        const id = item.extensionId;
-        let url = item.extensionURL ? item.extensionURL : id;
+        let id = item.extensionId;
+        const url = item.extensionURL ? item.extensionURL : id;
         if (!item.disabled && !id) {
-            // eslint-disable-next-line no-alert
-            url = prompt(this.props.intl.formatMessage(messages.extensionUrl));
+            // Workaround to avoid official translation process.
+            Object.assign(
+                this.props.intl.messages,
+                translations[this.props.intl.locale]
+            );
+            let inputUrl = url;
+            return prompt(
+                {
+                    message: this.props.intl.formatMessage(messages.extensionUrl),
+                    valueType: 'url',
+                    initialValue: 'https://xcratch.github.io/xcx-example/dist/xcratchExample.mjs'
+                })
+                .then(userInput => {
+                    inputUrl = userInput;
+                    return this.props.vm.extensionManager.fetchExtension(userInput);
+                })
+                .then(({entry, blockClass}) => {
+                    id = entry.extensionId;
+                    const existingEntry = extensionLibraryContent.find(libEntry => libEntry.extensionId === id);
+                    if (existingEntry) {
+                        return confirm(
+                            {
+                                message: this.props.intl.formatMessage(
+                                    messages.confirmReplacing,
+                                    {
+                                        name: existingEntry.name.props ?
+                                            this.props.intl.formatMessage(existingEntry.name.props) :
+                                            existingEntry.name,
+                                        url: blockClass.extensionURL
+                                    }
+                                )
+                            })
+                            .then(doReplace => {
+                                if (doReplace) {
+                                    this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
+                                    this.props.onCategorySelected(id);
+                                }
+                            });
+                    }
+                    this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
+                    this.props.onCategorySelected(id);
+                })
+                .catch(error => {
+                    log.info(`Error on load extension class from ${inputUrl}:\n${error.stack}\n`);
+                    alert({
+                        message: this.props.intl.formatMessage(
+                            messages.couldNotLoadExtension,
+                            {url: inputUrl}
+                        )
+                    });
+                    return;
+                });
         }
         if (id && !item.disabled) {
-            if (this.props.vm.extensionManager.isExtensionLoaded(url)) {
+            if (this.props.vm.extensionManager.isExtensionLoaded(id)) {
                 this.props.onCategorySelected(id);
-            } else {
-                this.props.vm.extensionManager.loadExtensionURL(url).then(() => {
+                return Promise.resolve();
+            }
+            return this.props.vm.extensionManager.loadExtensionURL(url)
+                .then(() => {
                     this.props.onCategorySelected(id);
                 });
-            }
         }
     }
     render () {
