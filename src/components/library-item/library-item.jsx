@@ -25,9 +25,11 @@ class LibraryItemComponent extends React.PureComponent {
                     this.props.extensionId ? styles.libraryItemExtension : null,
                     this.props.hidden ? styles.hidden : null
                 )}
-                onClick={this.props.onClick}
             >
-                <div className={styles.featuredImageContainer}>
+                <div
+                    className={styles.featuredImageContainer}
+                    onClick={this.props.onClick}
+                >
                     {this.props.disabled ? (
                         <div className={styles.comingSoonText}>
                             <FormattedMessage
@@ -60,6 +62,15 @@ class LibraryItemComponent extends React.PureComponent {
                     <span className={styles.libraryItemName}>{this.props.name}</span>
                     <br />
                     <span className={styles.featuredDescription}>{this.props.description}</span>
+                    <br />
+                    {this.props.extensionURL ? (
+                        <span className={styles.featuredExtensionUrl}>{'URL: '}
+                            <a
+                                href={this.props.extensionURL}
+                                target="_blank"
+                                rel="noreferrer"
+                            >{this.props.extensionURL}</a></span>
+                    ) : null}
                 </div>
                 {this.props.bluetoothRequired || this.props.internetConnectionRequired || this.props.collaborator ? (
                     <div className={styles.featuredExtensionMetadata}>
@@ -160,6 +171,7 @@ LibraryItemComponent.propTypes = {
     ]),
     disabled: PropTypes.bool,
     extensionId: PropTypes.string,
+    extensionURL: PropTypes.string,
     featured: PropTypes.bool,
     hidden: PropTypes.bool,
     iconSource: ScratchImage.ImageSourcePropType,

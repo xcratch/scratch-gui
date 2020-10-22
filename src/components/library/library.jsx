@@ -272,6 +272,7 @@ class LibraryComponent extends React.Component {
                             description={dataItem.description}
                             disabled={dataItem.disabled}
                             extensionId={dataItem.extensionId}
+                            extensionURL={dataItem.extensionURL}
                             featured={dataItem.featured}
                             hidden={dataItem.hidden}
                             icons={icons}
