@@ -14,6 +14,9 @@ import {
     projectError
 } from '../reducers/project-state';
 
+import extensionLibraryContent from '../lib/libraries/extensions/index.jsx';
+import preInstallExtensions from './libraries/extensions/preInstall/index.js';
+
 /*
  * Higher Order Component to manage events emitted by the VM
  * @param {React.Component} WrappedComponent component to manage VM events for
@@ -34,6 +37,9 @@ const vmManagerHOC = function (WrappedComponent) {
                 this.props.vm.setCompatibilityMode(true);
                 this.props.vm.initialized = true;
                 this.props.vm.setLocale(this.props.locale, this.props.messages);
+                // To load extension which is used in a project file.
+                this.props.vm.extensionManager.extensionLibraryContent = extensionLibraryContent;
+                preInstallExtensions(this.props.vm.extensionManager);
             }
             if (!this.props.isPlayerOnly && !this.props.isStarted) {
                 this.props.vm.start();

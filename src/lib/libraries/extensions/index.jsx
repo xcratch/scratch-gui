@@ -46,7 +46,7 @@ import gdxforInsetIconURL from './gdxfor/gdxfor-small.svg';
 import gdxforConnectionIconURL from './gdxfor/gdxfor-illustration.svg';
 import gdxforConnectionSmallIconURL from './gdxfor/gdxfor-small.svg';
 
-export default [
+const extensions = [
     {
         name: (
             <FormattedMessage
@@ -319,3 +319,8 @@ export default [
         helpLink: 'https://scratch.mit.edu/vernier'
     }
 ];
+
+export default extensions;
+
+import extensionLoader from './extensionLoader/index.jsx';
+extensions.unshift(extensionLoader);
