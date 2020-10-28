@@ -9,6 +9,8 @@ import extensionLibraryContent from '../lib/libraries/extensions/index.jsx';
 import LibraryComponent from '../components/library/library.jsx';
 import extensionIcon from '../components/action-menu/icon--sprite.svg';
 
+import {prompt, confirm, alert} from '../lib/async-modal.jsx';
+
 const messages = defineMessages({
     extensionTitle: {
         defaultMessage: 'Choose an Extension',
@@ -46,12 +48,14 @@ class ExtensionLibrary extends React.PureComponent {
     }
     handleItemSelect (item) {
         let id = item.extensionId;
-        let url = item.extensionURL ? item.extensionURL : id;
+        const url = item.extensionURL ? item.extensionURL : id;
         if (!item.disabled && !id) {
-            // eslint-disable-next-line no-alert
-            url = prompt(this.props.intl.formatMessage(messages.extensionUrl));
-            if (url) {
-                return this.props.vm.extensionManager.fetchExtension(url)
+            return prompt({
+                message: this.props.intl.formatMessage(messages.extensionUrl),
+                valueType: 'url',
+                initialValue: 'https://example.com/module.mjs'
+            })
+                .then(inputUrl => this.props.vm.extensionManager.fetchExtension(inputUrl)
                     .then(({entry, blockClass}) => {
                         id = entry.extensionId;
                         const existingEntry = extensionLibraryContent.find(libEntry => libEntry.extensionId === id);
@@ -61,32 +65,32 @@ class ExtensionLibrary extends React.PureComponent {
                                 this.props.intl.messages,
                                 translations[this.props.intl.locale]
                             );
-                            // eslint-disable-next-line no-alert
-                            const doReplace = confirm(
-                                this.props.intl.formatMessage(
+                            return confirm({
+                                message: this.props.intl.formatMessage(
                                     messages.confirmReplacing,
                                     {
-                                        name: ('props' in existingEntry.name) ?
+                                        name: existingEntry.name.props ?
                                             this.props.intl.formatMessage(existingEntry.name.props) :
                                             existingEntry.name,
-                                        url: url
+                                        url: inputUrl
                                     }
-                                )
-                            );
-                            if (!doReplace) {
-                                return Promise.resolve(null);
-                            }
+                                )}
+                            ).then(doReplace => {
+                                if (doReplace) {
+                                    this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
+                                    this.props.onCategorySelected(id);
+                                }
+                                return Promise.resolve();
+                            });
                         }
                         this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
-                        return Promise.resolve(id);
-                    })
-                    .then(extensionID => {
-                        this.props.onCategorySelected(extensionID);
+                        this.props.onCategorySelected(id);
                         return Promise.resolve();
                     })
-                    // eslint-disable-next-line no-alert
-                    .catch(error => Promise.reject(error));
-            }
+                    .catch(() => {
+                        alert({message: `Could not get extension from:\n${inputUrl}`});
+                    }))
+                .catch(() => Promise.resolve());
         }
         if (id && !item.disabled) {
             if (this.props.vm.extensionManager.isExtensionLoaded(id)) {
