@@ -60,7 +60,7 @@ const vmManagerHOC = function (WrappedComponent) {
                     return acc;
                 }, {});
             if (search.project) {
-                return fetch(search.project)
+                return fetch(decodeURIComponent(search.project))
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Project not found.');
