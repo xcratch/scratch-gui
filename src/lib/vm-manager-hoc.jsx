@@ -55,7 +55,8 @@ const vmManagerHOC = function (WrappedComponent) {
             const search = window.location.search.substr(1)
                 .split('&')
                 .reduce((acc, cur) => {
-                    acc[cur.split('=')[0]] = cur.split('=')[1];
+                    const keyAndValue = cur.split('=');
+                    acc[keyAndValue[0]] = keyAndValue[1];
                     return acc;
                 }, {});
             if (search.project) {
