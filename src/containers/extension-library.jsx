@@ -4,6 +4,8 @@ import React from 'react';
 import VM from 'scratch-vm';
 import {defineMessages, injectIntl, intlShape} from 'react-intl';
 
+import log from '../lib/log.js';
+
 import extensionLibraryContent from '../lib/libraries/extensions/index.jsx';
 
 import LibraryComponent from '../components/library/library.jsx';
@@ -87,7 +89,8 @@ class ExtensionLibrary extends React.PureComponent {
                         this.props.onCategorySelected(id);
                         return Promise.resolve();
                     })
-                    .catch(() => {
+                    .catch(error => {
+                        log.error(`Error on fetch ${inputUrl}:\n${error.stack}\n`);
                         alert({message: `Could not get extension from:\n${inputUrl}`});
                     }))
                 .catch(() => Promise.resolve());
