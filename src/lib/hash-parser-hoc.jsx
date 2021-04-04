@@ -37,6 +37,12 @@ const HashParserHOC = function (WrappedComponent) {
             window.removeEventListener('hashchange', this.handleHashChange);
         }
         handleHashChange () {
+            const hashValue = window.location.hash.substr(1);
+            const hashURLMatch = decodeURIComponent(hashValue).match(/^(http|https):\/\/(.*)/);
+            if (hashURLMatch) {
+                this.props.setProjectId(hashURLMatch[0]);
+                return;
+            }
             const hashMatch = window.location.hash.match(/#(\d+)/);
             const hashProjectId = hashMatch === null ? defaultProjectId : hashMatch[1];
             this.props.setProjectId(hashProjectId.toString());
