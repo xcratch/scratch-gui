@@ -6,11 +6,15 @@ var webpack = require('webpack');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+var WorkboxPlugin = require('workbox-webpack-plugin');
+var WebpackPwaManifest = require('webpack-pwa-manifest');
 
 // PostCss
 var autoprefixer = require('autoprefixer');
 var postcssVars = require('postcss-simple-vars');
 var postcssImport = require('postcss-import');
+
+const assetsManifest = require('./src/assetsManifest.json');
 
 const STATIC_PATH = process.env.STATIC_PATH || '/static';
 
@@ -138,7 +142,7 @@ module.exports = [
             new HtmlWebpackPlugin({
                 chunks: ['lib.min', 'gui'],
                 template: 'src/playground/index.ejs',
-                title: 'Scratch 3.0 GUI',
+                title: 'Xcratch',
                 sentryConfig: process.env.SENTRY_CONFIG ? '"' + process.env.SENTRY_CONFIG + '"' : null
             }),
             new HtmlWebpackPlugin({
@@ -175,7 +179,41 @@ module.exports = [
             new CopyWebpackPlugin([{
                 from: 'extension-worker.{js,js.map}',
                 context: 'node_modules/scratch-vm/dist/web'
-            }])
+            }]),
+            new WorkboxPlugin.GenerateSW({
+                clientsClaim: true,
+                skipWaiting: true,
+                additionalManifestEntries: assetsManifest,
+                exclude: [
+                    /\.DS_Store/
+                ],
+                maximumFileSizeToCacheInBytes: 32 * 1024 * 1024
+            }),
+            new WebpackPwaManifest({
+                name: 'Xcratch',
+                short_name: 'Xcratch',
+                description: 'Extendable Scratch3 mod',
+                background_color: '#ffffff',
+                orientation: 'any',
+                crossorigin: 'use-credentials',
+                inject: true,
+                ios: {
+                    'apple-mobile-web-app-title': 'Xcratch',
+                    'apple-mobile-web-app-status-bar-style': 'default'
+                },
+                icons: [
+                    {
+                        src: path.resolve('static/pwa-icon.png'),
+                        sizes: [96, 128, 192, 256, 384, 512] // multiple sizes
+                    },
+                    {
+                        src: path.resolve('static/pwa-maskable_icon.png'),
+                        sizes: '512x512',
+                        type: 'image/png',
+                        purpose: 'maskable'
+                    }
+                ]
+            })
         ])
     })
 ].concat(
