@@ -21,7 +21,7 @@ const messages = defineMessages({
     },
     extensionUrl: {
         defaultMessage: 'Enter the URL of the extension',
-        description: 'Prompt for unoffical extension url',
+        description: 'Prompt for unofficial extension url',
         id: 'gui.extensionLibrary.extensionUrl'
     },
     confirmReplacing: {
@@ -44,6 +44,17 @@ const translations = {
 class ExtensionLibrary extends React.PureComponent {
     constructor (props) {
         super(props);
+        extensionLibraryContent.forEach(extension => {
+            if (extension.setFormatMessage) {
+                extension.setFormatMessage(this.props.intl.formatMessage);
+            }
+            if (extension.translationMap) {
+                Object.assign(
+                    this.props.intl.messages,
+                    extension.translationMap[this.props.intl.locale]
+                );
+            }
+        });
         bindAll(this, [
             'handleItemSelect'
         ]);
@@ -111,14 +122,6 @@ class ExtensionLibrary extends React.PureComponent {
             rawURL: extension.iconURL || extensionIcon,
             ...extension
         }));
-        extensionLibraryContent.forEach(extension => {
-            if (extension.translationMap) {
-                Object.assign(
-                    this.props.intl.messages,
-                    extension.translationMap[this.props.intl.locale]
-                );
-            }
-        });
         return (
             <LibraryComponent
                 data={extensionLibraryThumbnailData}
