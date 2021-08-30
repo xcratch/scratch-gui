@@ -19,9 +19,15 @@ if (process.env.NODE_ENV === 'production' && typeof window === 'object') {
 
 import styles from './player.css';
 
+const openEditor = () => {
+    const editorPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/player'));
+    window.open(`${window.location.protocol}//${window.location.host}${editorPath}${window.location.hash}`);
+};
+
+// eslint-disable-next-line no-unused-vars
 const Player = ({isPlayerOnly, onSeeInside, projectId}) => (
     <Box className={classNames(isPlayerOnly ? styles.stageOnly : styles.editor)}>
-        {isPlayerOnly && <button onClick={onSeeInside}>{'See inside'}</button>}
+        {isPlayerOnly && <button onClick={openEditor}>{'Open Editor'}</button>}
         <GUI
             canEditTitle
             enableCommunity
