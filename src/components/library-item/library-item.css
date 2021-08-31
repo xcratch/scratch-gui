@@ -19,8 +19,7 @@
     border-style: solid;
     border-color: $ui-black-transparent;
     border-radius: $space;
-    text-align: center;
-    cursor: pointer;
+    /* text-align: center; */
 }
 
 .library-item-extension {
@@ -55,6 +54,12 @@
     position: absolute;
     height: 100px;
     width: 100%;
+    cursor: pointer;
+}
+
+.library-item-image-container:hover {
+    border-width: 2px;
+    border-color: $motion-primary;
 }
 
 .library-item-inset-image-container {
@@ -113,6 +118,12 @@
 
 .featured-image-container {
     position: relative;
+    cursor: pointer;
+}
+
+.featured-image-container:hover {
+    border-width: 2px;
+    border-color: $motion-primary;
 }
 
 .featured-image {
@@ -136,10 +147,14 @@
     padding-right: 1.25rem;
 }
 
-.featured-extension-url {
-    text-align: right;
+.featured-extension-help {
     padding-right: 1.25rem;
     font-size: 12px;
+}
+
+.featured-extension-url {
+    padding-right: 1.25rem;
+    font-size: 9px;
 }
 
 .featured-description {

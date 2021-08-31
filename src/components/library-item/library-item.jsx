@@ -59,14 +59,25 @@ class LibraryItemComponent extends React.PureComponent {
                     <span className={styles.libraryItemName}>{this.props.name}</span>
                     <br />
                     <span className={styles.featuredDescription}>{this.props.description}</span>
-                    <br />
+                    {this.props.helpLink ? (
+                        <div>
+                            <span className={styles.featuredExtensionHelp}>
+                                <a
+                                    href={this.props.helpLink}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >{'👉 Help Link'}</a></span>
+                        </div>
+                    ) : null}
                     {this.props.extensionURL ? (
-                        <span className={styles.featuredExtensionUrl}>{'URL: '}
-                            <a
-                                href={this.props.extensionURL}
-                                target="_blank"
-                                rel="noreferrer"
-                            >{this.props.extensionURL}</a></span>
+                        <div>
+                            <span className={styles.featuredExtensionUrl}>{'Module: '}
+                                <a
+                                    href={this.props.extensionURL}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >{this.props.extensionURL}</a></span>
+                        </div>
                     ) : null}
                 </div>
                 {this.props.bluetoothRequired || this.props.internetConnectionRequired || this.props.collaborator ? (
@@ -170,6 +181,7 @@ LibraryItemComponent.propTypes = {
     extensionId: PropTypes.string,
     extensionURL: PropTypes.string,
     featured: PropTypes.bool,
+    helpLink: PropTypes.string,
     hidden: PropTypes.bool,
     iconURL: PropTypes.string,
     insetIconURL: PropTypes.string,
