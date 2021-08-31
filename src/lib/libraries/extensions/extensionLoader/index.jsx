@@ -36,6 +36,6 @@ export default {
     disabled: false,
     internetConnectionRequired: true,
     collaborator: 'Yengawa Lab',
-    helpLink: 'https://lab.yengawa.com/project/scratch-loadable-extension/',
+    helpLink: 'https://xcratch.github.io/',
     translationMap: translationMap
 };
