@@ -63,58 +63,58 @@ class ExtensionLibrary extends React.PureComponent {
         let id = item.extensionId;
         const url = item.extensionURL ? item.extensionURL : id;
         if (!item.disabled && !id) {
-            return prompt({
-                message: this.props.intl.formatMessage(messages.extensionUrl),
-                valueType: 'url',
-                initialValue: 'https://example.com/module.mjs'
-            })
+            return prompt(
+                {
+                    message: this.props.intl.formatMessage(messages.extensionUrl),
+                    valueType: 'url',
+                    initialValue: 'https://xcratch.github.io/xcx-example/dist/xcratchExample.mjs'
+                })
                 .then(inputUrl => this.props.vm.extensionManager.fetchExtension(inputUrl)
-                    .then(({entry, blockClass}) => {
-                        id = entry.extensionId;
-                        const existingEntry = extensionLibraryContent.find(libEntry => libEntry.extensionId === id);
-                        if (existingEntry) {
-                            // Workaround to avoid official translation process.
-                            Object.assign(
-                                this.props.intl.messages,
-                                translations[this.props.intl.locale]
-                            );
-                            return confirm({
+                    .catch(error => {
+                        log.error(`Error on fetch ${inputUrl}:\n${error.stack}\n`);
+                        alert({message: `Could not get extension from:\n${inputUrl}`});
+                    }))
+                .then(({entry, blockClass}) => {
+                    id = entry.extensionId;
+                    const existingEntry = extensionLibraryContent.find(libEntry => libEntry.extensionId === id);
+                    if (existingEntry) {
+                        // Workaround to avoid official translation process.
+                        Object.assign(
+                            this.props.intl.messages,
+                            translations[this.props.intl.locale]
+                        );
+                        return confirm(
+                            {
                                 message: this.props.intl.formatMessage(
                                     messages.confirmReplacing,
                                     {
                                         name: existingEntry.name.props ?
                                             this.props.intl.formatMessage(existingEntry.name.props) :
                                             existingEntry.name,
-                                        url: inputUrl
+                                        url: blockClass.extensionURL
                                     }
-                                )}
-                            ).then(doReplace => {
+                                )
+                            })
+                            .then(doReplace => {
                                 if (doReplace) {
                                     this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
                                     this.props.onCategorySelected(id);
                                 }
-                                return Promise.resolve();
                             });
-                        }
-                        this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
-                        this.props.onCategorySelected(id);
-                        return Promise.resolve();
-                    })
-                    .catch(error => {
-                        log.error(`Error on fetch ${inputUrl}:\n${error.stack}\n`);
-                        alert({message: `Could not get extension from:\n${inputUrl}`});
-                    }))
-                .catch(() => Promise.resolve());
+                    }
+                    this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
+                    this.props.onCategorySelected(id);
+                });
         }
         if (id && !item.disabled) {
             if (this.props.vm.extensionManager.isExtensionLoaded(id)) {
                 this.props.onCategorySelected(id);
-            } else {
-                this.props.vm.extensionManager.loadExtensionURL(url).then(() => {
+                return Promise.resolve();
+            }
+            return this.props.vm.extensionManager.loadExtensionURL(url)
+                .then(() => {
                     this.props.onCategorySelected(id);
                 });
-            }
-            return Promise.resolve();
         }
     }
     render () {
