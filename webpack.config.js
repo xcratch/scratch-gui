@@ -34,6 +34,12 @@ const base = {
     resolve: {
         symlinks: false
     },
+    watchOptions: {
+        ignored: [
+            /node_modules([\\]+|\/)+(?!scratch-vm)/,
+            /\scratch-vm([\\]+|\/)node_modules/
+        ]
+    },
     module: {
         rules: [{
             test: /\.jsx?$/,
