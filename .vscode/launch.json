@@ -1,0 +1,21 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "pwa-chrome",
+      "request": "launch",
+      "preLaunchTask": "start https",
+      "name": "debug on dev-server",
+      "url": "https://localhost:8601/",
+      "webRoot": "${workspaceFolder}",
+      "sourceMaps": true,
+      "sourceMapPathOverrides": {
+        "webpack://GUI/./src/*": "${webRoot}/src/*",
+        "webpack://GUI/./node_modules/scratch-vm/*": "${webRoot}/../scratch-vm/*",
+      }
+    }
+  ]
+}
