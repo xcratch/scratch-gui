@@ -1,4 +1,3 @@
-/* eslint-disable no-undef */
 /* eslint-disable no-console */
 const fs = require('fs');
 const path = require('path');
@@ -62,7 +61,7 @@ const listAllAssets = function () {
             url: `https://assets.scratch.mit.edu/internalapi/asset/${file}/get/`,
             revision: file.split('.').slice(0, -1)[0]
         }));
-    fs.writeFile(manifest, JSON.stringify(urls, null, 2), (err) => {
+    fs.writeFile(manifest, JSON.stringify(urls, null, 2), err => {
         if (err) throw err;
         console.log('Assets Manifest has been saved!');
     });

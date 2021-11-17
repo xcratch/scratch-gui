@@ -1,0 +1,27 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "shell",
+			"command": "npm run start -- --https",
+			"isBackground": true,
+			"problemMatcher": {
+				"owner": "custom",
+				"pattern": {
+					"regexp": "^$"
+				},
+				"background": {
+					"activeOnStart": true,
+					"beginsPattern": "npm run.*",
+					"endsPattern": ".*Compiled successfully.*"
+				}
+			},
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"label": "start https",
+			"detail": "webpack-dev-server --https"
+		}
+	]
+}
