@@ -29,6 +29,7 @@ const costumePayload = costume => {
         break;
     default:
         alert(`Cannot serialize for format: ${assetDataFormat}`); // eslint-disable-line
+        return null;
     }
 
     // Do not generate the thumbnail from the raw asset. Instead use the getCostumeUrl
