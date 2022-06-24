@@ -188,7 +188,8 @@ module.exports = [
                 patterns: [
                     {
                         from: 'extension-worker.{js,js.map}',
-                        context: 'node_modules/scratch-vm/dist/web'
+                        context: 'node_modules/scratch-vm/dist/web',
+                        noErrorOnMissing: true
                     }
                 ]
             })
