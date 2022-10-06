@@ -33,7 +33,7 @@ const base = {
         chunkFilename: 'chunks/[name].js'
     },
     resolve: {
-        symlinks: false
+        symlinks: true
     },
     watchOptions: {
         ignored: [
