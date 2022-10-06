@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"type": "shell",
-			"command": "npm run start -- --https",
+			"command": "npm run start -- --https --key .vscode/localhost-key.pem --cert .vscode/localhost.pem",
 			"isBackground": true,
 			"problemMatcher": {
 				"owner": "custom",
