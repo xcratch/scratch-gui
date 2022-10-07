@@ -4,14 +4,16 @@ import {FormattedMessage} from 'react-intl';
 import iconImage from './extensionLoader.png';
 import insetImage from './extensionLoader-small.svg';
 
+const version = 'xcratch-0.3.2';
+
 const translationMap = {
     'ja': {
         'gui.extension.extensionLoader.name': '拡張機能を読み込む',
-        'gui.extension.extensionLoader.description': '拡張機能をインターネットから読み込む。'
+        'gui.extension.extensionLoader.description': `拡張機能をインターネットから読み込む。 (${version})`
     },
     'ja-Hira': {
         'gui.extension.extensionLoader.name': 'かくちょうきのうをよみこむ',
-        'gui.extension.extensionLoader.description': 'かくちょうきのうをインターネットからよみこむ。'
+        'gui.extension.extensionLoader.description': `かくちょうきのうをインターネットからよみこむ。 (${version})`
     }
 };
 
