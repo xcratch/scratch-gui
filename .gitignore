@@ -18,5 +18,11 @@ npm-*
 /translations
 /locale
 
+# Other generated source
+/src/generated
+
+# Downloaded during "npm install"
+/static/microbit
+
 # HTTPS certification
 *.pem

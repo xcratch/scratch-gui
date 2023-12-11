@@ -18,6 +18,8 @@ import {BLOCKS_DEFAULT_SCALE, STAGE_DISPLAY_SIZES} from '../lib/layout-constants
 import DropAreaHOC from '../lib/drop-area-hoc.jsx';
 import DragConstants from '../lib/drag-constants';
 import defineDynamicBlock from '../lib/define-dynamic-block';
+import {DEFAULT_THEME, getColorsForTheme, themeMap} from '../lib/themes';
+import {injectExtensionBlockTheme, injectExtensionCategoryTheme} from '../lib/themes/blockHelpers';
 
 import {connect} from 'react-redux';
 import {updateToolbox} from '../reducers/toolbox';
@@ -26,6 +28,7 @@ import {closeExtensionLibrary, openSoundRecorder, openConnectionModal} from '../
 import {activateCustomProcedures, deactivateCustomProcedures} from '../reducers/custom-procedures';
 import {setConnectionModalExtensionId} from '../reducers/connection-modal';
 import {updateMetrics} from '../reducers/workspace-metrics';
+import {isTimeTravel2020} from '../reducers/time-travel';
 
 import {
     activateTab,
@@ -48,7 +51,7 @@ const DroppableBlocks = DropAreaHOC([
 class Blocks extends React.Component {
     constructor (props) {
         super(props);
-        this.ScratchBlocks = VMScratchBlocks(props.vm);
+        this.ScratchBlocks = VMScratchBlocks(props.vm, false);
         bindAll(this, [
             'attachVM',
             'detachVM',
@@ -87,6 +90,11 @@ class Blocks extends React.Component {
         this.toolboxUpdateQueue = [];
     }
     componentDidMount () {
+        this.ScratchBlocks = VMScratchBlocks(this.props.vm, this.props.useCatBlocks);
+        this.ScratchBlocks.prompt = this.handlePromptStart;
+        this.ScratchBlocks.statusButtonCallback = this.handleConnectionModalStart;
+        this.ScratchBlocks.recordSoundCallback = this.handleOpenSoundRecorder;
+
         this.ScratchBlocks.FieldColourSlider.activateEyedropper_ = this.props.onActivateColorPicker;
         this.ScratchBlocks.Procedures.externalProcedureDefCallback = this.props.onActivateCustomProcedures;
         this.ScratchBlocks.ScratchMsgs.setLocale(this.props.locale);
@@ -94,7 +102,7 @@ class Blocks extends React.Component {
         const workspaceConfig = defaultsDeep({},
             Blocks.defaultOptions,
             this.props.options,
-            {rtl: this.props.isRtl, toolbox: this.props.toolboxXML}
+            {rtl: this.props.isRtl, toolbox: this.props.toolboxXML, colours: getColorsForTheme(this.props.theme)}
         );
         this.workspace = this.ScratchBlocks.inject(this.blocks, workspaceConfig);
 
@@ -191,6 +199,9 @@ class Blocks extends React.Component {
         this.detachVM();
         this.workspace.dispose();
         clearTimeout(this.toolboxUpdateTimeout);
+
+        // Clear the flyout blocks so that they can be recreated on mount.
+        this.props.vm.clearFlyoutBlocks();
     }
     requestToolboxUpdate () {
         clearTimeout(this.toolboxUpdateTimeout);
@@ -344,11 +355,15 @@ class Blocks extends React.Component {
             const stageCostumes = stage.getCostumes();
             const targetCostumes = target.getCostumes();
             const targetSounds = target.getSounds();
-            const dynamicBlocksXML = this.props.vm.runtime.getBlocksXML(target);
+            const dynamicBlocksXML = injectExtensionCategoryTheme(
+                this.props.vm.runtime.getBlocksXML(target),
+                this.props.theme
+            );
             return makeToolboxXML(false, target.isStage, target.id, dynamicBlocksXML,
                 targetCostumes[targetCostumes.length - 1].name,
                 stageCostumes[stageCostumes.length - 1].name,
-                targetSounds.length > 0 ? targetSounds[targetSounds.length - 1].name : ''
+                targetSounds.length > 0 ? targetSounds[targetSounds.length - 1].name : '',
+                getColorsForTheme(this.props.theme)
             );
         } catch {
             return null;
@@ -427,7 +442,7 @@ class Blocks extends React.Component {
                     if (blockInfo.info && blockInfo.info.isDynamic) {
                         dynamicBlocksInfo.push(blockInfo);
                     } else if (blockInfo.json) {
-                        staticBlocksJson.push(blockInfo.json);
+                        staticBlocksJson.push(injectExtensionBlockTheme(blockInfo.json, this.props.theme));
                     }
                     // otherwise it's a non-block entry such as '---'
                 });
@@ -550,6 +565,7 @@ class Blocks extends React.Component {
             onRequestCloseCustomProcedures,
             toolboxXML,
             updateMetrics: updateMetricsProp,
+            useCatBlocks,
             workspaceMetrics,
             ...props
         } = this.props;
@@ -617,25 +633,15 @@ Blocks.propTypes = {
             wheel: PropTypes.bool,
             startScale: PropTypes.number
         }),
-        colours: PropTypes.shape({
-            workspace: PropTypes.string,
-            flyout: PropTypes.string,
-            toolbox: PropTypes.string,
-            toolboxSelected: PropTypes.string,
-            scrollbar: PropTypes.string,
-            scrollbarHover: PropTypes.string,
-            insertionMarker: PropTypes.string,
-            insertionMarkerOpacity: PropTypes.number,
-            fieldShadow: PropTypes.string,
-            dragShadowOpacity: PropTypes.number
-        }),
         comments: PropTypes.bool,
         collapse: PropTypes.bool
     }),
     stageSize: PropTypes.oneOf(Object.keys(STAGE_DISPLAY_SIZES)).isRequired,
+    theme: PropTypes.oneOf(Object.keys(themeMap)),
     toolboxXML: PropTypes.string,
     updateMetrics: PropTypes.func,
     updateToolboxState: PropTypes.func,
+    useCatBlocks: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired,
     workspaceMetrics: PropTypes.shape({
         targets: PropTypes.objectOf(PropTypes.object)
@@ -653,18 +659,6 @@ Blocks.defaultOptions = {
         length: 2,
         colour: '#ddd'
     },
-    colours: {
-        workspace: '#F9F9F9',
-        flyout: '#F9F9F9',
-        toolbox: '#FFFFFF',
-        toolboxSelected: '#E9EEF2',
-        scrollbar: '#CECDCE',
-        scrollbarHover: '#CECDCE',
-        insertionMarker: '#000000',
-        insertionMarkerOpacity: 0.2,
-        fieldShadow: 'rgba(255, 255, 255, 0.3)',
-        dragShadowOpacity: 0.6
-    },
     comments: true,
     collapse: false,
     sounds: false
@@ -672,7 +666,8 @@ Blocks.defaultOptions = {
 
 Blocks.defaultProps = {
     isVisible: true,
-    options: Blocks.defaultOptions
+    options: Blocks.defaultOptions,
+    theme: DEFAULT_THEME
 };
 
 const mapStateToProps = state => ({
@@ -686,7 +681,8 @@ const mapStateToProps = state => ({
     messages: state.locales.messages,
     toolboxXML: state.scratchGui.toolbox.toolboxXML,
     customProceduresVisible: state.scratchGui.customProcedures.active,
-    workspaceMetrics: state.scratchGui.workspaceMetrics
+    workspaceMetrics: state.scratchGui.workspaceMetrics,
+    useCatBlocks: isTimeTravel2020(state)
 });
 
 const mapDispatchToProps = dispatch => ({

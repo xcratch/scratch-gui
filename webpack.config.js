@@ -1,18 +1,18 @@
 const defaultsDeep = require('lodash.defaultsdeep');
-var path = require('path');
-var webpack = require('webpack');
+const path = require('path');
+const webpack = require('webpack');
 
 // Plugins
-var CopyWebpackPlugin = require('copy-webpack-plugin');
-var HtmlWebpackPlugin = require('html-webpack-plugin');
-var UglifyJsPlugin = require('uglifyjs-webpack-plugin');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 var WorkboxPlugin = require('workbox-webpack-plugin');
 var WebpackPwaManifest = require('webpack-pwa-manifest');
 
 // PostCss
-var autoprefixer = require('autoprefixer');
-var postcssVars = require('postcss-simple-vars');
-var postcssImport = require('postcss-import');
+const autoprefixer = require('autoprefixer');
+const postcssVars = require('postcss-simple-vars');
+const postcssImport = require('postcss-import');
 
 const assetsManifest = require('./src/assetsManifest.json');
 
@@ -90,6 +90,15 @@ const base = {
                     }
                 }
             }]
+        },
+        {
+            test: /\.hex$/,
+            use: [{
+                loader: 'url-loader',
+                options: {
+                    limit: 16 * 1024
+                }
+            }]
         }]
     },
     optimization: {
@@ -99,7 +108,25 @@ const base = {
             })
         ]
     },
-    plugins: []
+    plugins: [
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: 'node_modules/scratch-blocks/media',
+                    to: 'static/blocks-media/default'
+                },
+                {
+                    from: 'node_modules/scratch-blocks/media',
+                    to: 'static/blocks-media/high-contrast'
+                },
+                {
+                    from: 'src/lib/themes/high-contrast/blocks-media',
+                    to: 'static/blocks-media/high-contrast',
+                    force: true
+                }
+            ]
+        })
+    ]
 };
 
 if (!process.env.CI) {
@@ -123,9 +150,10 @@ module.exports = [
         module: {
             rules: base.module.rules.concat([
                 {
-                    test: /\.(svg|png|wav|gif|jpg)$/,
-                    loader: 'file-loader',
+                    test: /\.(svg|png|wav|mp3|gif|jpg)$/,
+                    loader: 'url-loader',
                     options: {
+                        limit: 2048,
                         outputPath: 'static/assets/'
                     }
                 }
@@ -142,15 +170,14 @@ module.exports = [
         },
         plugins: base.plugins.concat([
             new webpack.DefinePlugin({
-                'process.env.NODE_ENV': '"' + process.env.NODE_ENV + '"',
+                'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
                 'process.env.DEBUG': Boolean(process.env.DEBUG),
-                'process.env.GA_ID': '"' + (process.env.GA_ID || 'UA-000000-01') + '"'
+                'process.env.GA_ID': `"${process.env.GA_ID || 'UA-000000-01'}"`
             }),
             new HtmlWebpackPlugin({
                 chunks: ['lib.min', 'gui'],
                 template: 'src/playground/index.ejs',
                 title: 'Xcratch',
-                sentryConfig: process.env.SENTRY_CONFIG ? '"' + process.env.SENTRY_CONFIG + '"' : null
             }),
             new HtmlWebpackPlugin({
                 chunks: ['lib.min', 'blocksonly'],
@@ -175,14 +202,6 @@ module.exports = [
                     {
                         from: 'static',
                         to: 'static'
-                    }
-                ]
-            }),
-            new CopyWebpackPlugin({
-                patterns: [
-                    {
-                        from: 'node_modules/scratch-blocks/media',
-                        to: 'static/blocks-media'
                     }
                 ]
             }),
@@ -260,9 +279,10 @@ module.exports = [
             module: {
                 rules: base.module.rules.concat([
                     {
-                        test: /\.(svg|png|wav|gif|jpg)$/,
-                        loader: 'file-loader',
+                        test: /\.(svg|png|wav|mp3|gif|jpg)$/,
+                        loader: 'url-loader',
                         options: {
+                            limit: 2048,
                             outputPath: 'static/assets/',
                             publicPath: `${STATIC_PATH}/assets/`
                         }
@@ -273,16 +293,9 @@ module.exports = [
                 new CopyWebpackPlugin({
                     patterns: [
                         {
-                            from: 'node_modules/scratch-blocks/media',
-                            to: 'static/blocks-media'
-                        }
-                    ]
-                }),
-                new CopyWebpackPlugin({
-                    patterns: [
-                        {
                             from: 'extension-worker.{js,js.map}',
-                            context: 'node_modules/scratch-vm/dist/web'
+                            context: 'node_modules/scratch-vm/dist/web',
+                            noErrorOnMissing: true
                         }
                     ]
                 }),

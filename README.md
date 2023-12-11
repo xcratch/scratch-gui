@@ -129,6 +129,12 @@ If you want to watch the browser as it runs the test, rather than running headle
 USE_HEADLESS=no $(npm bin)/jest --runInBand test/integration/backpack.test.js
 ```
 
+_Note: If you are seeing failed tests related to `chromedriver` being incompatible with your version of Chrome, you may need to update `chromedriver` with:_
+
+```bash
+npm install chromedriver@{version}
+```
+
 ## Troubleshooting
 
 ### Ignoring optional dependencies
@@ -256,4 +262,4 @@ Here's what will happen in the project state machine:
 7. The `SHOWING_WITH_ID` state. Now the project appears normally and is playable and editable.
 
 ## Donate
-We provide [Scratch](https://scratch.mit.edu) free of charge, and want to keep it that way! Please consider making a [donation](https://secure.donationpay.org/scratchfoundation/) to support our continued engineering, design, community, and resource development efforts. Donations of any size are appreciated. Thank you!
+We provide [Scratch](https://scratch.mit.edu) free of charge, and want to keep it that way! Please consider making a [donation](https://www.scratchfoundation.org/donate) to support our continued engineering, design, community, and resource development efforts. Donations of any size are appreciated. Thank you!

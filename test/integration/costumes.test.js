@@ -13,6 +13,9 @@ const {
     scope
 } = new SeleniumHelper();
 
+// The costumes library is slow to load. Increase the timeout for these tests.
+jest.setTimeout(60_000);
+
 const uri = path.resolve(__dirname, '../../build/index.html');
 
 let driver;
@@ -27,10 +30,6 @@ describe('Working with costumes', () => {
     });
 
     test('Adding a costume through the library', async () => {
-        // This is needed when running the tests all at once or it just fails...
-        await driver.quit();
-        driver = getDriver();
-
         await loadUri(uri);
         await driver.sleep(500);
         await clickText('Costumes');
