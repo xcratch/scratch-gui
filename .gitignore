@@ -26,3 +26,6 @@ npm-*
 
 # HTTPS certification
 *.pem
+
+# PWA
+assetsManifest.json
