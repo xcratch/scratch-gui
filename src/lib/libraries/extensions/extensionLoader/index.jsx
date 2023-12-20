@@ -4,7 +4,7 @@ import {FormattedMessage} from 'react-intl';
 import iconImage from './extensionLoader.png';
 import insetImage from './extensionLoader-small.svg';
 
-const version = 'xcratch-0.3.2';
+const version = 'xcratch-0.3.3';
 
 const translationMap = {
     'ja': {
