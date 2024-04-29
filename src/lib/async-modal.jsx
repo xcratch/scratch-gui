@@ -55,7 +55,7 @@ class AsyncModal extends React.Component {
     }
  
     handleRequestClose () {
-        this.props.reject();
+        this.setState({modalIsOpen: false});
     }
  
     handleSubmit () {
@@ -63,7 +63,7 @@ class AsyncModal extends React.Component {
     }
   
     handleCancel () {
-        this.setState({modalIsOpen: false}, this.props.reject());
+        this.setState({modalIsOpen: false});
     }
   
     handleAfterClose () {
