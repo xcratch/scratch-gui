@@ -16,6 +16,7 @@
     "default": "./src/index.js"
   },
   "scripts": {
+    "prebuild": "node ./scripts/makePWAAssetsManifest.js",
     "build": "npm run clean && webpack",
     "clean": "rimraf ./build ./dist",
     "deploy": "touch build/.nojekyll && gh-pages -t -d build -m \"[skip ci] Build for $(git log --pretty=format:%H -n1)\"",
@@ -149,6 +150,8 @@
     "webpack": "5.91.0",
     "webpack-cli": "5.1.4",
     "webpack-dev-server": "5.0.4",
+    "webpack-pwa-manifest": "^4.3.0",
+    "workbox-webpack-plugin": "^7.0.0",
     "yauzl": "2.10.0"
   },
   "jest": {
