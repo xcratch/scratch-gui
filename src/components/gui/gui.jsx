@@ -65,7 +65,7 @@ const GUIComponent = props => {
         backpackVisible,
         blocksId,
         blocksTabVisible,
-        cardsVisible,
+        // cardsVisible,
         canChangeLanguage,
         canChangeTheme,
         canCreateNew,
@@ -120,7 +120,7 @@ const GUIComponent = props => {
         targetIsStage,
         telemetryModalVisible,
         theme,
-        tipsLibraryVisible,
+        // tipsLibraryVisible,
         vm,
         ...componentProps
     } = omit(props, 'dispatch');
