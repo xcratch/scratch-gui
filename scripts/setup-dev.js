@@ -2,7 +2,7 @@
 /* eslint-disable no-console */
 const path = require('path');
 const fs = require('fs');
-const yargs = require('yargs')
+const yargs = require('yargs');
 
 const argv = yargs
     .option('vm',
@@ -17,13 +17,17 @@ const argv = yargs
         })
     .version(false)
     .help()
-    .argv
+    .argv;
 
 const VmRoot = path.resolve(process.cwd(), argv.vm);
 const GuiRoot = path.resolve(process.cwd(), argv.gui);
 
-// Make symbolic link
-function makeSymbolicLink(to, from) {
+/**
+ * Make symbolic links
+ * @param {string} to - target path
+ * @param {string} from - link path
+ */
+const makeSymbolicLink = function (to, from) {
     try {
         const stats = fs.lstatSync(from);
         if (stats.isSymbolicLink()) {
@@ -40,7 +44,7 @@ function makeSymbolicLink(to, from) {
     }
     fs.symlinkSync(to, from, 'dir');
     console.log(`Make link: ${from} -> ${fs.readlinkSync(from)}`);
-}
+};
 
 // Use local scratch-vm in scratch-gui
 try {
