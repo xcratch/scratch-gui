@@ -4,6 +4,8 @@ const webpack = require('webpack');
 // Plugins
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const WorkboxPlugin = require('workbox-webpack-plugin');
+const WebpackPwaManifest = require('webpack-pwa-manifest');
 
 // PostCss
 const autoprefixer = require('autoprefixer');
@@ -116,6 +118,50 @@ const baseConfig = new ScratchWebpackConfigBuilder(
         ]
     }));
 
+// Add Workbox plugin for service worker generation
+if (process.env.NODE_ENV === 'development') {
+    console.log('Skipping Workbox plugin for service worker generation');
+} else {
+    const assetsManifest = require('./src/assetsManifest.json');
+    console.log('Adding Workbox plugin for service worker generation');
+    baseConfig
+        .addPlugin(new WorkboxPlugin.GenerateSW({
+            clientsClaim: true,
+            skipWaiting: true,
+            additionalManifestEntries: assetsManifest,
+            exclude: [
+                /\.DS_Store/
+            ],
+            maximumFileSizeToCacheInBytes: 32 * 1024 * 1024
+        }))
+        .addPlugin(new WebpackPwaManifest({
+            publicPath: './',
+            name: 'Xcratch',
+            short_name: 'Xcratch',
+            description: 'Extendable Scratch3 mod',
+            background_color: '#ffffff',
+            orientation: 'any',
+            crossorigin: 'use-credentials',
+            inject: true,
+            ios: {
+                'apple-mobile-web-app-title': 'Xcratch',
+                'apple-mobile-web-app-status-bar-style': 'default'
+            },
+            icons: [
+                {
+                    src: path.resolve('static/pwa-icon.png'),
+                    sizes: [96, 128, 192, 256, 384, 512] // multiple sizes
+                },
+                {
+                    src: path.resolve('static/pwa-maskable_icon.png'),
+                    sizes: '512x512',
+                    type: 'image/png',
+                    purpose: 'maskable'
+                }
+            ]
+        }));
+}
+
 if (!process.env.CI) {
     baseConfig.addPlugin(new webpack.ProgressPlugin());
 }
@@ -146,23 +192,27 @@ const buildConfig = baseConfig.clone()
         }
     })
     .addPlugin(new HtmlWebpackPlugin({
+        environment: process.env.NODE_ENV,
         chunks: ['gui'],
         template: 'src/playground/index.ejs',
         title: 'Scratch 3.0 GUI'
     }))
     .addPlugin(new HtmlWebpackPlugin({
+        environment: process.env.NODE_ENV,
         chunks: ['blocksonly'],
         filename: 'blocks-only.html',
         template: 'src/playground/index.ejs',
         title: 'Scratch 3.0 GUI: Blocks Only Example'
     }))
     .addPlugin(new HtmlWebpackPlugin({
+        environment: process.env.NODE_ENV,
         chunks: ['compatibilitytesting'],
         filename: 'compatibility-testing.html',
         template: 'src/playground/index.ejs',
         title: 'Scratch 3.0 GUI: Compatibility Testing'
     }))
     .addPlugin(new HtmlWebpackPlugin({
+        environment: process.env.NODE_ENV,
         chunks: ['player'],
         filename: 'player.html',
         template: 'src/playground/index.ejs',
