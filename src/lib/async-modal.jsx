@@ -135,8 +135,7 @@ AsyncModal.propTypes = {
     message: PropTypes.string,
     valueType: PropTypes.string,
     initialValue: PropTypes.oneOfType([PropTypes.string, PropTypes.bool]),
-    resolve: PropTypes.func,
-    reject: PropTypes.func
+    resolve: PropTypes.func
 };
 
 export const prompt = ({
