@@ -24,9 +24,11 @@ class LibraryItemComponent extends React.PureComponent {
                     this.props.extensionId ? styles.libraryItemExtension : null,
                     this.props.hidden ? styles.hidden : null
                 )}
-                onClick={this.props.onClick}
             >
-                <div className={styles.featuredImageContainer}>
+                <div
+                    className={styles.featuredImageContainer}
+                    onClick={this.props.onClick}
+                >
                     {this.props.disabled ? (
                         <div className={styles.comingSoonText}>
                             <FormattedMessage
@@ -57,6 +59,26 @@ class LibraryItemComponent extends React.PureComponent {
                     <span className={styles.libraryItemName}>{this.props.name}</span>
                     <br />
                     <span className={styles.featuredDescription}>{this.props.description}</span>
+                    {this.props.helpLink ? (
+                        <div>
+                            <span className={styles.featuredExtensionHelp}>
+                                <a
+                                    href={this.props.helpLink}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >{'👉 Help Link'}</a></span>
+                        </div>
+                    ) : null}
+                    {this.props.extensionURL ? (
+                        <div>
+                            <span className={styles.featuredExtensionUrl}>{'Module: '}
+                                <a
+                                    href={this.props.extensionURL}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                >{this.props.extensionURL}</a></span>
+                        </div>
+                    ) : null}
                 </div>
                 {this.props.bluetoothRequired || this.props.internetConnectionRequired || this.props.collaborator ? (
                     <div className={styles.featuredExtensionMetadata}>
@@ -157,7 +179,9 @@ LibraryItemComponent.propTypes = {
     ]),
     disabled: PropTypes.bool,
     extensionId: PropTypes.string,
+    extensionURL: PropTypes.string,
     featured: PropTypes.bool,
+    helpLink: PropTypes.string,
     hidden: PropTypes.bool,
     iconURL: PropTypes.string,
     insetIconURL: PropTypes.string,
