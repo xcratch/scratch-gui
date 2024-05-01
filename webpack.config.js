@@ -182,6 +182,19 @@ const buildConfig = baseConfig.clone()
         ]
     }));
 
+// Enable HTTPS for the dev server
+buildConfig.merge({
+    devServer: {
+        server: {
+            type: 'https',
+            options: {
+                key: '.vscode/localhost-key.pem',
+                cert: '.vscode/localhost.pem'
+            }
+        }
+    }
+});
+
 // resolve symlinks for local development
 baseConfig.merge({
     resolve: {
