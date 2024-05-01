@@ -1,7 +1,7 @@
 import classNames from 'classnames';
 import {connect} from 'react-redux';
 import {compose} from 'redux';
-import {defineMessages, FormattedMessage, injectIntl, intlShape} from 'react-intl';
+import {FormattedMessage, injectIntl, intlShape} from 'react-intl';
 import PropTypes from 'prop-types';
 import bindAll from 'lodash.bindall';
 import bowser from 'bowser';
@@ -14,7 +14,7 @@ import Button from '../button/button.jsx';
 import CommunityButton from './community-button.jsx';
 import ShareButton from './share-button.jsx';
 import {ComingSoonTooltip} from '../coming-soon/coming-soon.jsx';
-import Divider from '../divider/divider.jsx';
+// import Divider from '../divider/divider.jsx';
 import SaveStatus from './save-status.jsx';
 import ProjectWatcher from '../../containers/project-watcher.jsx';
 import MenuBarMenu from './menu-bar-menu.jsx';
@@ -76,7 +76,7 @@ import collectMetadata from '../../lib/collect-metadata';
 
 import styles from './menu-bar.css';
 
-import helpIcon from '../../lib/assets/icon--tutorials.svg';
+// import helpIcon from '../../lib/assets/icon--tutorials.svg';
 import mystuffIcon from './icon--mystuff.png';
 import profileIcon from './icon--profile.png';
 import remixIcon from './icon--remix.svg';
@@ -93,13 +93,13 @@ import oldtimeyLogo from './oldtimey-logo.svg';
 
 import sharedMessages from '../../lib/shared-messages';
 
-const ariaMessages = defineMessages({
-    tutorials: {
-        id: 'gui.menuBar.tutorialsLibrary',
-        defaultMessage: 'Tutorials',
-        description: 'accessibility text for the tutorials button'
-    }
-});
+// const ariaMessages = defineMessages({
+//     tutorials: {
+//         id: 'gui.menuBar.tutorialsLibrary',
+//         defaultMessage: 'Tutorials',
+//         description: 'accessibility text for the tutorials button'
+//     }
+// });
 
 const MenuBarItemTooltip = ({
     children,
@@ -842,7 +842,7 @@ MenuBar.propTypes = {
     canShare: PropTypes.bool,
     className: PropTypes.string,
     confirmReadyToReplaceProject: PropTypes.func,
-    currentLocale: PropTypes.string.isRequired,
+    // currentLocale: PropTypes.string.isRequired,
     editMenuOpen: PropTypes.bool,
     enableCommunity: PropTypes.bool,
     fileMenuOpen: PropTypes.bool,
@@ -855,10 +855,10 @@ MenuBar.propTypes = {
     locale: PropTypes.string.isRequired,
     loginMenuOpen: PropTypes.bool,
     logo: PropTypes.string,
-    mode1920: PropTypes.bool,
-    mode1990: PropTypes.bool,
+    // mode1920: PropTypes.bool,
+    // mode1990: PropTypes.bool,
     mode2020: PropTypes.bool,
-    mode220022BC: PropTypes.bool,
+    // mode220022BC: PropTypes.bool,
     modeMenuOpen: PropTypes.bool,
     modeNow: PropTypes.bool,
     onClickAbout: PropTypes.oneOfType([
@@ -883,7 +883,7 @@ MenuBar.propTypes = {
     onClickSettings: PropTypes.func,
     onLogOut: PropTypes.func,
     onOpenRegistration: PropTypes.func,
-    onOpenTipLibrary: PropTypes.func,
+    // onOpenTipLibrary: PropTypes.func,
     onProjectTelemetryEvent: PropTypes.func,
     onRequestCloseAbout: PropTypes.func,
     onRequestCloseAccount: PropTypes.func,
@@ -897,7 +897,7 @@ MenuBar.propTypes = {
     onSetTimeTravelMode: PropTypes.func,
     onShare: PropTypes.func,
     onStartSelectingFileUpload: PropTypes.func,
-    onToggleLoginOpen: PropTypes.func,
+    // onToggleLoginOpen: PropTypes.func,
     projectTitle: PropTypes.string,
     renderLogin: PropTypes.func,
     sessionExists: PropTypes.bool,
@@ -905,7 +905,7 @@ MenuBar.propTypes = {
     shouldSaveBeforeTransition: PropTypes.func,
     showComingSoon: PropTypes.bool,
     username: PropTypes.string,
-    userOwnsProject: PropTypes.bool,
+    // userOwnsProject: PropTypes.bool,
     vm: PropTypes.instanceOf(VM).isRequired
 };
 
