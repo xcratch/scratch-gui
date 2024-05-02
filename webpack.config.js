@@ -122,6 +122,7 @@ const baseConfig = new ScratchWebpackConfigBuilder(
 if (process.env.NODE_ENV === 'development') {
     console.log('Skipping Workbox plugin for service worker generation');
 } else {
+    // eslint-disable-next-line global-require
     const assetsManifest = require('./src/assetsManifest.json');
     console.log('Adding Workbox plugin for service worker generation');
     baseConfig
