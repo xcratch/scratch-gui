@@ -28,16 +28,23 @@ const messages = defineMessages({
         defaultMessage: 'Do you want to replace extension\n\nextension name: {name}\nload from: {url}',
         description: 'Confirm for replacing of the extension',
         id: 'gui.extensionLibrary.confirmReplacingExtension'
+    },
+    couldNotLoadExtension: {
+        defaultMessage: 'Could not load extension from: ',
+        description: 'Error message when extension could not be loaded',
+        id: 'gui.extensionLibrary.couldNotLoadExtension'
     }
 });
 
 // Workaround to avoid official translation process.
 const translations = {
     'ja': {
-        'gui.extensionLibrary.confirmReplacingExtension': '拡張機能を置き換えますか?\n\n拡張機能名: {name}\n読み込み元: {url}'
+        'gui.extensionLibrary.confirmReplacingExtension': '拡張機能を置き換えますか?\n\n拡張機能名: {name}\n読み込み元: {url}',
+        'gui.extensionLibrary.couldNotLoadExtension': '拡張機能をロードできませんでした: {url}'
     },
     'ja-Hira': {
-        'gui.extensionLibrary.confirmReplacingExtension': 'かくちょうきのうをおきかえますか?\n\nかくちょうきのうめい: {name}\nよみこみもと: {url}'
+        'gui.extensionLibrary.confirmReplacingExtension': 'かくちょうきのうをおきかえますか?\n\nかくちょうきのうめい: {name}\nよみこみもと: {url}',
+        'gui.extensionLibrary.couldNotLoadExtension': 'かくちょうきのうをロードできませんでした: {url}'
     }
 };
 
@@ -63,26 +70,26 @@ class ExtensionLibrary extends React.PureComponent {
         let id = item.extensionId;
         const url = item.extensionURL ? item.extensionURL : id;
         if (!item.disabled && !id) {
+            // Workaround to avoid official translation process.
+            Object.assign(
+                this.props.intl.messages,
+                translations[this.props.intl.locale]
+            );
+            let inputUrl = url;
             return prompt(
                 {
                     message: this.props.intl.formatMessage(messages.extensionUrl),
                     valueType: 'url',
                     initialValue: 'https://xcratch.github.io/xcx-example/dist/xcratchExample.mjs'
                 })
-                .then(inputUrl => this.props.vm.extensionManager.fetchExtension(inputUrl)
-                    .catch(error => {
-                        log.error(`Error on fetch ${inputUrl}:\n${error.stack}\n`);
-                        alert({message: `Could not get extension from:\n${inputUrl}`});
-                    }))
+                .then(userInput => {
+                    inputUrl = userInput;
+                    return this.props.vm.extensionManager.fetchExtension(userInput);
+                })
                 .then(({entry, blockClass}) => {
                     id = entry.extensionId;
                     const existingEntry = extensionLibraryContent.find(libEntry => libEntry.extensionId === id);
                     if (existingEntry) {
-                        // Workaround to avoid official translation process.
-                        Object.assign(
-                            this.props.intl.messages,
-                            translations[this.props.intl.locale]
-                        );
                         return confirm(
                             {
                                 message: this.props.intl.formatMessage(
@@ -104,6 +111,16 @@ class ExtensionLibrary extends React.PureComponent {
                     }
                     this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
                     this.props.onCategorySelected(id);
+                })
+                .catch(error => {
+                    log.info(`Error on load extension class from ${inputUrl}:\n${error.stack}\n`);
+                    alert({
+                        message: this.props.intl.formatMessage(
+                            messages.couldNotLoadExtension,
+                            {url: inputUrl}
+                        )
+                    });
+                    return;
                 });
         }
         if (id && !item.disabled) {

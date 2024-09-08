@@ -7,11 +7,6 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const WorkboxPlugin = require('workbox-webpack-plugin');
 const WebpackPwaManifest = require('webpack-pwa-manifest');
 
-// PostCss
-const autoprefixer = require('autoprefixer');
-const postcssVars = require('postcss-simple-vars');
-const postcssImport = require('postcss-import');
-
 const ScratchWebpackConfigBuilder = require('scratch-webpack-configuration');
 
 // const STATIC_PATH = process.env.STATIC_PATH || '/static';
@@ -19,7 +14,8 @@ const ScratchWebpackConfigBuilder = require('scratch-webpack-configuration');
 const baseConfig = new ScratchWebpackConfigBuilder(
     {
         rootPath: path.resolve(__dirname),
-        enableReact: true
+        enableReact: true,
+        shouldSplitChunks: false
     })
     .setTarget('browserslist')
     .merge({
@@ -35,58 +31,13 @@ const baseConfig = new ScratchWebpackConfigBuilder(
                 Buffer: require.resolve('buffer/'),
                 stream: require.resolve('stream-browserify')
             }
-        },
-        optimization: {
-            splitChunks: {
-                chunks: 'all'
-            },
-            mergeDuplicateChunks: true,
-            runtimeChunk: 'single'
         }
-    })
-    .addModuleRule({
-        test: /\.css$/,
-        use: [
-            {
-                loader: 'style-loader'
-            },
-            {
-                loader: 'css-loader',
-                options: {
-                    modules: {
-                        localIdentName: '[name]_[local]_[hash:base64:5]'
-                    },
-                    importLoaders: 1,
-                    localsConvention: 'camelCase'
-                }
-            },
-            {
-                loader: 'postcss-loader',
-                options: {
-                    ident: 'postcss',
-                    plugins: function () {
-                        return [
-                            postcssImport,
-                            postcssVars,
-                            autoprefixer
-                        ];
-                    }
-                }
-            }
-        ]
     })
     .addModuleRule({
         test: /\.(svg|png|wav|mp3|gif|jpg)$/,
         resourceQuery: /^$/, // reject any query string
         type: 'asset' // let webpack decide on the best type of asset
     })
-    .addModuleRule({
-        test: /\.hex$/,
-        type: 'asset/resource'
-    })
-    .addPlugin(new webpack.ProvidePlugin({
-        Buffer: ['buffer', 'Buffer']
-    }))
     .addPlugin(new webpack.DefinePlugin({
         'process.env.DEBUG': Boolean(process.env.DEBUG),
         'process.env.GA_ID': `"${process.env.GA_ID || 'UA-000000-01'}"`,
@@ -176,11 +127,22 @@ const distConfig = baseConfig.clone()
         output: {
             path: path.resolve(__dirname, 'dist')
         }
-    });
+    })
+    .addPlugin(
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: 'src/lib/libraries/*.json',
+                    to: 'libraries',
+                    flatten: true
+                }
+            ]
+        })
+    );
 
 // build the examples and debugging tools in `build/`
 const buildConfig = baseConfig.clone()
-    .enableDevServer(process.env.PORT || 8602)
+    .enableDevServer(process.env.PORT || 8601)
     .merge({
         entry: {
             gui: './src/playground/index.jsx',
