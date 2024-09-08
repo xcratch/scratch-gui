@@ -9,7 +9,7 @@
       "request": "launch",
       "preLaunchTask": "start https",
       "name": "debug on dev-server",
-      "url": "https://localhost:8602/",
+      "url": "https://localhost:8601/",
       "webRoot": "${workspaceFolder}",
       "sourceMaps": true,
       "sourceMapPathOverrides": {
