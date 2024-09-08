@@ -3,6 +3,114 @@
 All notable changes to this project will be documented in this file. See
 [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.19](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.18...v4.0.19) (2024-09-07)
+
+
+### Bug Fixes
+
+* update scratch-{vm,webpack-configuration} to fix music extension ([0741369](https://github.com/scratchfoundation/scratch-gui/commit/07413690bc334c670512cac33a6a74da9c94c38f))
+
+## [4.0.18](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.17...v4.0.18) (2024-09-05)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([9e11cb7](https://github.com/scratchfoundation/scratch-gui/commit/9e11cb7bac8a477d8fbebed27a642ae646610edf))
+
+## [4.0.17](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.16...v4.0.17) (2024-09-02)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([e59686e](https://github.com/scratchfoundation/scratch-gui/commit/e59686ebd619e53e5b928c82f3c4749f2076666d))
+
+## [4.0.16](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.15...v4.0.16) (2024-09-01)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([cbfffa2](https://github.com/scratchfoundation/scratch-gui/commit/cbfffa2dfb918492559987a05fc807ba39b996eb))
+
+## [4.0.15](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.14...v4.0.15) (2024-08-29)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([c518b32](https://github.com/scratchfoundation/scratch-gui/commit/c518b32de59f3afa29712c32d7192c8cb7698d0d))
+
+## [4.0.14](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.13...v4.0.14) (2024-08-28)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([8df385f](https://github.com/scratchfoundation/scratch-gui/commit/8df385f7abe85282a169991bec5aaee76cd3ee95))
+
+## [4.0.13](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.12...v4.0.13) (2024-08-27)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([c704c18](https://github.com/scratchfoundation/scratch-gui/commit/c704c18d4dc8b7d82576a6d8b87510ea48c836ec))
+
+## [4.0.12](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.11...v4.0.12) (2024-08-27)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([67246f8](https://github.com/scratchfoundation/scratch-gui/commit/67246f81a55539652d31ce4c5e638143c366659c))
+
+## [4.0.11](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.10...v4.0.11) (2024-08-26)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([6753315](https://github.com/scratchfoundation/scratch-gui/commit/6753315a25f528515989a6a91ee2614dc47b68b9))
+* pin cheerio to 1.0.0-rc.3 for now ([ac9a6e5](https://github.com/scratchfoundation/scratch-gui/commit/ac9a6e5d99dd35dcf3cece9f55b606a38a8cc659))
+
+## [4.0.10](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.9...v4.0.10) (2024-08-10)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([6078482](https://github.com/scratchfoundation/scratch-gui/commit/6078482752df1fc3e7e7c3a4a23b397a6ea626f7))
+
+## [4.0.9](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.8...v4.0.9) (2024-08-09)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([1868ae9](https://github.com/scratchfoundation/scratch-gui/commit/1868ae902256f89f3d597e54d72f8c0763191972))
+
+## [4.0.8](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.7...v4.0.8) (2024-08-08)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([145cfd3](https://github.com/scratchfoundation/scratch-gui/commit/145cfd3d583b18e4504bbbeec0ad4119f79cc2a1))
+
+## [4.0.7](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.6...v4.0.7) (2024-08-08)
+
+
+### Bug Fixes
+
+* **deps:** lock file maintenance ([68c2da0](https://github.com/scratchfoundation/scratch-gui/commit/68c2da0402443421d2ea45e63a6c9e1155db2107))
+
+## [4.0.6](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.5...v4.0.6) (2024-08-01)
+
+
+### Reverts
+
+* Revert "ci: reduce package size" ([1054259](https://github.com/scratchfoundation/scratch-gui/commit/105425909c92cb5c162be2d03434e4338ec8cfa5))
+* Revert "fix(package): don't omit src" ([d7c5f60](https://github.com/scratchfoundation/scratch-gui/commit/d7c5f60f808b5658457c9af2a3fe124d791aff9f))
+
+## [4.0.5](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.4...v4.0.5) (2024-07-31)
+
+
+### Bug Fixes
+
+* [UEPR-27] Updated the css loader and added libraries to the build ([b7808e8](https://github.com/scratchfoundation/scratch-gui/commit/b7808e8d523ec48ddfb43e4de6ba1843a10f39be))
+* [UEPR-30] Updated style-loader version to fix component not rendering ([509d294](https://github.com/scratchfoundation/scratch-gui/commit/509d294132dd27316049f98fbc2e842da2681969))
+
 ## [4.0.4](https://github.com/scratchfoundation/scratch-gui/compare/v4.0.3...v4.0.4) (2024-04-24)
 
 
