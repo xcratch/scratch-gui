@@ -12,6 +12,10 @@ import TagButton from '../../containers/tag-button.jsx';
 import Spinner from '../spinner/spinner.jsx';
 import {CATEGORIES} from '../../../src/lib/libraries/decks/index.jsx';
 
+// Categories from the extension library
+CATEGORIES.loaded = 'loaded';
+CATEGORIES.preloaded = 'preloaded';
+
 import styles from './library.css';
 
 const messages = defineMessages({
@@ -46,6 +50,16 @@ const messages = defineMessages({
         id: `gui.library.prompts`,
         defaultMessage: 'Prompts',
         description: 'Label for prompts category'
+    },
+    [CATEGORIES.loaded]: {
+        id: `xcratch.category.loaded`,
+        defaultMessage: 'Loaded',
+        description: 'Label for loaded extensions category'
+    },
+    [CATEGORIES.preloaded]: {
+        id: `xcratch.category.preloaded`,
+        defaultMessage: 'Preloaded',
+        description: 'Label for preloaded extensions category'
     }
 });
 
@@ -180,6 +194,14 @@ class LibraryComponent extends React.Component {
         ));
     }
     constructKey (data) {
+        // Use extensionId or extensionURL as the primary key for extensions
+        if (data.extensionId) {
+            return data.extensionId;
+        }
+        if (data.extensionURL) {
+            return data.extensionURL;
+        }
+        // Fall back to name or rawURL for other library items
         return typeof data.name === 'string' ? data.name : data.rawURL;
     }
     scrollToTop () {
@@ -219,7 +241,7 @@ class LibraryComponent extends React.Component {
             return data.map(item => this.renderElement(item));
         }
 
-        const dataByCategory = Object.groupBy(data, el => el.category);
+        const dataByCategory = Object.groupBy(data, el => el.category || 'undefined');
         const categoriesOrder = Object.values(CATEGORIES);
 
         return Object.entries(dataByCategory)
