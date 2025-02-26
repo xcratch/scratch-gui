@@ -32,3 +32,6 @@ npm-*
 
 # PWA
 assetsManifest.json
+
+# Preload
+/preload

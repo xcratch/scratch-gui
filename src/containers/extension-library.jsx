@@ -27,26 +27,204 @@ const messages = defineMessages({
     confirmReplacing: {
         defaultMessage: 'Do you want to replace extension\n\nextension name: {name}\nload from: {url}',
         description: 'Confirm for replacing of the extension',
-        id: 'gui.extensionLibrary.confirmReplacingExtension'
+        id: 'xcratch.confirmReplacingExtension'
     },
     couldNotLoadExtension: {
         defaultMessage: 'Could not load extension from: ',
         description: 'Error message when extension could not be loaded',
-        id: 'gui.extensionLibrary.couldNotLoadExtension'
+        id: 'xcratch.couldNotLoadExtension'
+    },
+    functionTag: {
+        defaultMessage: 'Function',
+        description: 'Tag for filtering function enhancement extensions',
+        id: 'xcratch.tag.function'
+    },
+    imageTag: {
+        defaultMessage: 'Image',
+        description: 'Tag for filtering visual enhancement extensions',
+        id: 'xcratch.tag.image'
+    },
+    soundTag: {
+        defaultMessage: 'Sound',
+        description: 'Tag for filtering audio enhancement extensions',
+        id: 'xcratch.tag.sound'
+    },
+    textTag: {
+        defaultMessage: 'Text',
+        description: 'Tag for filtering text enhancement extensions',
+        id: 'xcratch.tag.text'
+    },
+    calculationTag: {
+        defaultMessage: 'Calculation',
+        description: 'Tag for filtering calculation enhancement extensions',
+        id: 'xcratch.tag.calculation'
+    },
+    networkTag: {
+        defaultMessage: 'Network',
+        description: 'Tag for filtering network enhancement extensions',
+        id: 'xcratch.tag.network'
+    },
+    deviceTag: {
+        defaultMessage: 'Device',
+        description: 'Tag for filtering device enhancement extensions',
+        id: 'xcratch.tag.device'
+    },
+    aiTag: {
+        defaultMessage: 'AI',
+        description: 'Tag for filtering AI enhancement extensions',
+        id: 'xcratch.tag.ai'
     }
 });
 
 // Workaround to avoid official translation process.
 const translations = {
     'ja': {
-        'gui.extensionLibrary.confirmReplacingExtension': '拡張機能を置き換えますか?\n\n拡張機能名: {name}\n読み込み元: {url}',
-        'gui.extensionLibrary.couldNotLoadExtension': '拡張機能をロードできませんでした: {url}'
+        'xcratch.confirmReplacingExtension': '拡張機能を置き換えますか?\n\n拡張機能名: {name}\n読み込み元: {url}',
+        'xcratch.couldNotLoadExtension': '拡張機能をロードできませんでした: {url}',
+        'xcratch.category.loaded': '読み込み済み',
+        'xcratch.category.preloaded': '先読み済み',
+        // Tags for filtering extensions
+        'xcratch.tag.function': '機能',
+        'xcratch.tag.image': '画像',
+        'xcratch.tag.sound': '音',
+        'xcratch.tag.text': 'テキスト',
+        'xcratch.tag.calculation': '計算',
+        'xcratch.tag.network': 'ネットワーク',
+        'xcratch.tag.device': 'デバイス',
+        'xcratch.tag.ai': 'AI'
     },
     'ja-Hira': {
-        'gui.extensionLibrary.confirmReplacingExtension': 'かくちょうきのうをおきかえますか?\n\nかくちょうきのうめい: {name}\nよみこみもと: {url}',
-        'gui.extensionLibrary.couldNotLoadExtension': 'かくちょうきのうをロードできませんでした: {url}'
+        'xcratch.confirmReplacingExtension': 'かくちょうきのうをおきかえますか?\n\nかくちょうきのうめい: {name}\nよみこみもと: {url}',
+        'xcratch.couldNotLoadExtension': 'かくちょうきのうをロードできませんでした: {url}',
+        'xcratch.category.loaded': 'よみこみずみ',
+        'xcratch.category.preloaded': 'さきよみずみ',
+        // Tags for filtering extensions
+        'xcratch.tag.function': 'きのう',
+        'xcratch.tag.image': 'がぞう',
+        'xcratch.tag.sound': 'おと',
+        'xcratch.tag.text': 'テキスト',
+        'xcratch.tag.calculation': 'けいさん',
+        'xcratch.tag.network': 'ネットワーク',
+        'xcratch.tag.device': 'デバイス',
+        'xcratch.tag.ai': 'AI'
     }
 };
+
+/**
+ * Holds the preloaded extensions
+ * @type {Array<{entry: Object, blockClass: Object}>?}
+ */
+let preloadedExtensions = [];
+let preloaded = false;
+
+/**
+ * Load preloaded extensions
+ * @returns {Promise<Array<{entry: object, blockClass: object}>>} - Preloaded extensions
+ */
+const loadModules = async () => {
+    if (preloaded) {
+        return preloadedExtensions;
+    }
+
+    // Set flag immediately to prevent concurrent calls
+    preloaded = true;
+
+    try {
+        let extensions = [];
+        try {
+            // Check if preload.json exists at compile time and load it.
+            const preloadContext = import.meta.webpackContext(
+                '../../preload',
+                {regExp: /^\.\/preload\.json$/, mode: 'lazy'}
+            );
+            if (preloadContext.keys().includes('./preload.json')) {
+                const preloadJson = await preloadContext('./preload.json');
+                extensions = preloadJson.default || preloadJson;
+            }
+        } catch (e) {
+            // This can happen if the preload directory does not exist.
+            extensions = [];
+        }
+        
+        if (!Array.isArray(extensions)) {
+            log.warn('Invalid preload.json format');
+            return preloadedExtensions;
+        }
+
+        // Create webpack context for preload directory
+        let preloadContext = null;
+        try {
+            preloadContext = import.meta.webpackContext('/preload', {
+                recursive: true,
+                regExp: /extension\.mjs$/
+            });
+        } catch (contextError) {
+            return preloadedExtensions;
+        }
+
+        // Skip if no extensions to load
+        if (extensions.length === 0) {
+            return preloadedExtensions;
+        }
+
+        // Load each extension module using webpack context
+        const modules = await Promise.all(
+            extensions.map(async ext => {
+                try {
+                    // Convert file path to webpack context key
+                    const contextKey = `./${ext.path}`;
+                    const module = await preloadContext(contextKey);
+                    return {
+                        entry: module.entry,
+                        blockClass: module.blockClass,
+                        url: ext.url
+                    };
+                } catch (error) {
+                    log.warn(`Failed to load extension ${ext.url}:`, error);
+                    return null;
+                }
+            })
+        );
+
+        // Filter out failed loads
+        preloadedExtensions = modules.filter(module => module && module.entry && module.blockClass);
+
+        // Sort by name
+        preloadedExtensions.sort((a, b) => {
+            const nameA = a.entry.name.defaultMessage ?
+                a.entry.name.defaultMessage :
+                a.entry.name;
+            const nameB = b.entry.name.defaultMessage ?
+                b.entry.name.defaultMessage :
+                b.entry.name;
+            return nameA.localeCompare(nameB);
+        });
+
+        // Register all preloaded extensions
+        preloadedExtensions.forEach(({entry, url}) => {
+            entry.category = 'preloaded';
+            entry.extensionURL = url;
+            // Check if extension is already in the library to prevent duplicates
+            const existingIndex = extensionLibraryContent.findIndex(
+                item => item.extensionId === entry.extensionId ||
+                        (item.extensionURL && item.extensionURL === url)
+            );
+            if (existingIndex === -1) {
+                extensionLibraryContent.push(entry);
+            }
+        });
+
+        return preloadedExtensions;
+    } catch (error) {
+        log.info('Error loading preloaded extensions:', error);
+        return preloadedExtensions;
+    }
+};
+
+// Load preloaded extensions
+loadModules().then(extensions => {
+    log.info('Extensions preloaded:', extensions.map(({entry}) => entry.extensionId));
+});
 
 class ExtensionLibrary extends React.PureComponent {
     constructor (props) {
@@ -65,65 +243,31 @@ class ExtensionLibrary extends React.PureComponent {
         bindAll(this, [
             'handleItemSelect'
         ]);
+        
+        if (!preloaded) {
+        // Set preloaded extensions into VM for fallback when loading extension class from URL.
+            preloadedExtensions.forEach(({entry, blockClass}) => {
+                this.props.vm.extensionManager
+                    .registerExtensionBlock(entry, blockClass, true); // true: preloaded
+            });
+            // Clear preloadedExtensions to avoid duplicate registration.
+            preloaded = true;
+        }
+        // Load extension class from the URL.
+        // Workaround to avoid official translation process.
+        Object.assign(
+            this.props.intl.messages,
+            translations[this.props.intl.locale]
+        );
     }
+
     handleItemSelect (item) {
+        if (item.disabled) {
+            return;
+        }
         let id = item.extensionId;
         const url = item.extensionURL ? item.extensionURL : id;
-        if (!item.disabled && !id) {
-            // Workaround to avoid official translation process.
-            Object.assign(
-                this.props.intl.messages,
-                translations[this.props.intl.locale]
-            );
-            let inputUrl = url;
-            return prompt(
-                {
-                    message: this.props.intl.formatMessage(messages.extensionUrl),
-                    valueType: 'url',
-                    initialValue: 'https://xcratch.github.io/xcx-example/dist/xcratchExample.mjs'
-                })
-                .then(userInput => {
-                    inputUrl = userInput;
-                    return this.props.vm.extensionManager.fetchExtension(userInput);
-                })
-                .then(({entry, blockClass}) => {
-                    id = entry.extensionId;
-                    const existingEntry = extensionLibraryContent.find(libEntry => libEntry.extensionId === id);
-                    if (existingEntry) {
-                        return confirm(
-                            {
-                                message: this.props.intl.formatMessage(
-                                    messages.confirmReplacing,
-                                    {
-                                        name: existingEntry.name.props ?
-                                            this.props.intl.formatMessage(existingEntry.name.props) :
-                                            existingEntry.name,
-                                        url: blockClass.extensionURL
-                                    }
-                                )
-                            })
-                            .then(doReplace => {
-                                if (doReplace) {
-                                    this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
-                                    this.props.onCategorySelected(id);
-                                }
-                            });
-                    }
-                    this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
-                    this.props.onCategorySelected(id);
-                })
-                .catch(error => {
-                    log.info(`Error on load extension class from ${inputUrl}:\n${error.stack}\n`);
-                    alert({
-                        message: this.props.intl.formatMessage(
-                            messages.couldNotLoadExtension,
-                            {url: inputUrl}
-                        )
-                    });
-                    return;
-                });
-        }
-        if (id && !item.disabled) {
+        if (id) {
             if (this.props.vm.extensionManager.isExtensionLoaded(id)) {
                 this.props.onCategorySelected(id);
                 return Promise.resolve();
@@ -133,6 +277,54 @@ class ExtensionLibrary extends React.PureComponent {
                     this.props.onCategorySelected(id);
                 });
         }
+        let inputUrl = url;
+        return prompt(
+            {
+                message: this.props.intl.formatMessage(messages.extensionUrl),
+                valueType: 'url',
+                initialValue: 'https://xcratch.github.io/xcx-example/dist/xcratchExample.mjs'
+            })
+            .then(userInput => {
+                inputUrl = userInput;
+                return this.props.vm.extensionManager.fetchExtension(userInput);
+            })
+            .then(({entry, blockClass}) => {
+                id = entry.extensionId;
+                const existingEntry = extensionLibraryContent.find(libEntry => libEntry.extensionId === id);
+                if (existingEntry) {
+                    return confirm(
+                        {
+                            message: this.props.intl.formatMessage(
+                                messages.confirmReplacing,
+                                {
+                                    name: existingEntry.name.props ?
+                                        this.props.intl.formatMessage(existingEntry.name.props) :
+                                        existingEntry.name,
+                                    url: blockClass.extensionURL
+                                }
+                            )
+                        })
+                        .then(doReplace => {
+                            if (doReplace) {
+                                this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
+                                this.props.onCategorySelected(id);
+                            }
+                        });
+                }
+                this.props.vm.extensionManager.registerExtensionBlock(entry, blockClass);
+                this.props.onCategorySelected(id);
+            })
+            .catch(error => {
+                log.info(`Error on load extension class from ${inputUrl}:\n${error.stack}\n`);
+                alert({
+                    message: this.props.intl.formatMessage(
+                        messages.couldNotLoadExtension,
+                        {url: inputUrl}
+                    )
+                });
+                return;
+            });
+        
     }
     render () {
         const extensionLibraryThumbnailData = extensionLibraryContent.map(extension => ({
@@ -142,12 +334,23 @@ class ExtensionLibrary extends React.PureComponent {
         return (
             <LibraryComponent
                 data={extensionLibraryThumbnailData}
-                filterable={false}
+                filterable
                 id="extensionLibrary"
                 title={this.props.intl.formatMessage(messages.extensionTitle)}
                 visible={this.props.visible}
                 onItemSelected={this.handleItemSelect}
                 onRequestClose={this.props.onRequestClose}
+                withCategories
+                tags={[
+                    {tag: 'image', intlLabel: messages.imageTag},
+                    {tag: 'sound', intlLabel: messages.soundTag},
+                    {tag: 'text', intlLabel: messages.textTag},
+                    {tag: 'calculation', intlLabel: messages.calculationTag},
+                    {tag: 'network', intlLabel: messages.networkTag},
+                    {tag: 'device', intlLabel: messages.deviceTag},
+                    {tag: 'function', intlLabel: messages.functionTag},
+                    {tag: 'ai', intlLabel: messages.aiTag}
+                ]}
             />
         );
     }

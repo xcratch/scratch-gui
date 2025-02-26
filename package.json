@@ -11,7 +11,8 @@
   },
   "main": "./dist/scratch-gui.js",
   "scripts": {
-    "prebuild": "node ./scripts/makePWAAssetsManifest.js",
+    "preload": "rimraf ./preload && node scripts/preload.mjs",
+    "prebuild": "node ./scripts/makePWAAssetsManifest.js && npm run preload",
     "build": "npm run clean && webpack",
     "clean": "rimraf ./build ./dist",
     "deploy": "touch build/.nojekyll && gh-pages -t -d build -m \"[skip ci] Build for $(git log --pretty=format:%H -n1)\"",

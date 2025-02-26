@@ -23,6 +23,7 @@ export default {
             id="gui.extension.extensionLoader.name"
         />
     ),
+    tags: ['function'],
     iconURL: iconImage,
     insetIconURL: insetImage,
     description: (
