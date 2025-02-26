@@ -1,0 +1,18 @@
+{
+    "approved": [
+    ],
+    "ignore": [
+        "^https?:\/\/localhost",
+        "^https?:\/\/127\\.0\\.0\\.1",
+        "^https?:\/\/192\\.168\\.",
+        "^https?:\/\/0\\.0\\.0\\.0",
+        "^https?:\/\/\\[::1\\]",
+        "^https?:\/\/\\[0:0:0:0:0:0:0:1\\]",
+        "^https:\/\/xcratch.github.io\/xcx-example\/",
+        "my-extension",
+        "my-blocks"
+    ],
+    "allow": [
+    ],
+    "minCount": 100
+}
