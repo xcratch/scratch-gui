@@ -3,7 +3,7 @@
 	"tasks": [
 		{
 			"type": "shell",
-			"command": "export NODE_ENV='development' && npm run start",
+			"command": "npm run start",
 			"isBackground": true,
 			"problemMatcher": {
 				"owner": "custom",
@@ -21,7 +21,13 @@
 				"isDefault": true
 			},
 			"label": "start https",
-			"detail": "webpack-dev-server --https"
+			"detail": "webpack-dev-server --https",
+			"options": {
+				"env": {
+					"NODE_ENV": "development",
+					"XCRATCH_EXTENSION_COLLECTOR_URL": "https://asia-northeast1-xcratch-extension-collector.cloudfunctions.net/recordXCX-recordXCX"
+				}
+			}
 		}
 	]
 }

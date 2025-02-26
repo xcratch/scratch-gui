@@ -39,6 +39,7 @@ const vmManagerHOC = function (WrappedComponent) {
                 this.props.vm.setLocale(this.props.locale, this.props.messages);
                 // To load extension which is used in a project file.
                 this.props.vm.extensionManager.extensionLibraryContent = extensionLibraryContent;
+                this.props.vm.extensionManager.extensionCollectorUrl = process.env.XCRATCH_EXTENSION_COLLECTOR_URL;
                 preInstallExtensions(this.props.vm.extensionManager);
             }
             if (!this.props.isPlayerOnly && !this.props.isStarted) {
