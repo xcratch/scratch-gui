@@ -11,11 +11,24 @@ const ScratchWebpackConfigBuilder = require('scratch-webpack-configuration');
 
 // const STATIC_PATH = process.env.STATIC_PATH || '/static';
 
+const commonHtmlWebpackPluginOptions = {
+    // Google Tag Manager ID
+    // Looks like 'GTM-XXXXXXX'
+    gtm_id: process.env.GTM_ID || '',
+
+    // Google Tag Manager env & auth info for alterative GTM environments
+    // Looks like '&gtm_auth=0123456789abcdefghijklm&gtm_preview=env-00&gtm_cookies_win=x'
+    // Taken from the middle of: GTM -> Admin -> Environments -> (environment) -> Get Snippet
+    // Blank for production
+    gtm_env_auth: process.env.GTM_ENV_AUTH || ''
+};
+
 const baseConfig = new ScratchWebpackConfigBuilder(
     {
         rootPath: path.resolve(__dirname),
         enableReact: true,
-        shouldSplitChunks: false
+        shouldSplitChunks: false,
+        publicPath: 'auto'
     })
     .setTarget('browserslist')
     .merge({
@@ -128,6 +141,7 @@ const distConfig = baseConfig.clone()
             path: path.resolve(__dirname, 'dist')
         }
     })
+    .addExternals(['react', 'react-dom'])
     .addPlugin(
         new CopyWebpackPlugin({
             patterns: [
@@ -155,27 +169,27 @@ const buildConfig = baseConfig.clone()
         }
     })
     .addPlugin(new HtmlWebpackPlugin({
-        environment: process.env.NODE_ENV,
+        ...commonHtmlWebpackPluginOptions,
         chunks: ['gui'],
         template: 'src/playground/index.ejs',
         title: 'Scratch 3.0 GUI'
     }))
     .addPlugin(new HtmlWebpackPlugin({
-        environment: process.env.NODE_ENV,
+        ...commonHtmlWebpackPluginOptions,
         chunks: ['blocksonly'],
         filename: 'blocks-only.html',
         template: 'src/playground/index.ejs',
         title: 'Scratch 3.0 GUI: Blocks Only Example'
     }))
     .addPlugin(new HtmlWebpackPlugin({
-        environment: process.env.NODE_ENV,
+        ...commonHtmlWebpackPluginOptions,
         chunks: ['compatibilitytesting'],
         filename: 'compatibility-testing.html',
         template: 'src/playground/index.ejs',
         title: 'Scratch 3.0 GUI: Compatibility Testing'
     }))
     .addPlugin(new HtmlWebpackPlugin({
-        environment: process.env.NODE_ENV,
+        ...commonHtmlWebpackPluginOptions,
         chunks: ['player'],
         filename: 'player.html',
         template: 'src/playground/index.ejs',
