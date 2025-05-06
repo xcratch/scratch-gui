@@ -26,3 +26,6 @@ npm-*
 
 # for act
 .secrets
+
+# HTTPS certification
+*.pem

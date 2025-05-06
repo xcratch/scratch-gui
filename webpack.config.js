@@ -182,6 +182,26 @@ const buildConfig = baseConfig.clone()
         ]
     }));
 
+// Enable HTTPS for the dev server
+buildConfig.merge({
+    devServer: {
+        server: {
+            type: 'https',
+            options: {
+                key: '.vscode/localhost-key.pem',
+                cert: '.vscode/localhost.pem'
+            }
+        }
+    }
+});
+
+// resolve symlinks for local development
+baseConfig.merge({
+    resolve: {
+        symlinks: true
+    }
+});
+
 // Skip building `dist/` unless explicitly requested
 // It roughly doubles build time and isn't needed for `scratch-gui` development
 // If you need non-production `dist/` for local dev, such as for `scratch-www` work, you can run something like:
