@@ -10,11 +10,27 @@
       "preLaunchTask": "start https",
       "name": "debug on dev-server",
       "url": "https://localhost:8601/",
-      "webRoot": "${workspaceFolder}",
+      "webRoot": "${workspaceFolder}/..",
       "sourceMaps": true,
+      "sourceMapRenames": true,
       "sourceMapPathOverrides": {
-        "webpack://GUI/./src/*": "${webRoot}/src/*",
-        "webpack://GUI/./node_modules/scratch-vm/*": "${webRoot}/../scratch-vm/*",
+        "webpack://GUI/*": "${webRoot}/scratch-gui/*",
+        "webpack://GUI/scratch-vm/*": "${webRoot}/scratch-vm/*",
+        "https://0.0.0.0:5500/*": "${webRoot}/*", // local extension server for debugging
+      }
+    },
+    {
+      "type": "chrome",
+      "request": "launch",
+      "name": "attach debugger on dev-server",
+      "url": "https://localhost:8601/",
+      "webRoot": "${workspaceFolder}/..",
+      "sourceMaps": true,
+      "sourceMapRenames": true,
+      "sourceMapPathOverrides": {
+        "webpack://GUI/*": "${webRoot}/scratch-gui/*",
+        "webpack://GUI/scratch-vm/*": "${webRoot}/scratch-vm/*",
+        "https://0.0.0.0:5500/*": "${webRoot}/*", // local extension server for debugging
       }
     }
   ]
