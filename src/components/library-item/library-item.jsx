@@ -12,6 +12,28 @@ import internetConnectionIconURL from './internet-connection.svg';
 
 /* eslint-disable react/prefer-stateless-function */
 class LibraryItemComponent extends React.PureComponent {
+    constructor (props) {
+        super(props);
+        this.state = {
+            copySuccess: false
+        };
+        this.handleCopyToClipboard = this.handleCopyToClipboard.bind(this);
+    }
+    
+    handleCopyToClipboard (e) {
+        e.preventDefault();
+        navigator.clipboard.writeText(this.props.extensionURL)
+            .then(() => {
+                this.setState({copySuccess: true});
+                setTimeout(() => {
+                    this.setState({copySuccess: false});
+                }, 2000);
+            })
+            .catch(err => {
+                console.error('Failed to copy URL: ', err);
+            });
+    }
+    
     render () {
         return this.props.featured ? (
             <div
@@ -76,7 +98,10 @@ class LibraryItemComponent extends React.PureComponent {
                                     href={this.props.extensionURL}
                                     target="_blank"
                                     rel="noreferrer"
-                                >{this.props.extensionURL}</a></span>
+                                    onClick={this.handleCopyToClipboard}
+                                    title="Click to copy URL to clipboard"
+                                >{this.props.extensionURL} {this.state.copySuccess ? '✓ Copied!' : ''}</a>
+                            </span>
                         </div>
                     ) : null}
                 </div>
