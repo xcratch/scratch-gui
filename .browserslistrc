@@ -1,7 +1,8 @@
 # See https://scratch.mit.edu/faq
+# Updated to support dynamic import() syntax
 Chrome >= 63
-Edge >= 15
-Firefox >= 57
-Safari >= 11
+Edge >= 79
+Firefox >= 67
+Safari >= 11.1
 Android >= 63
-iOS >= 11
+iOS >= 11.3
