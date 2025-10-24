@@ -21,7 +21,14 @@
 				"isDefault": true
 			},
 			"label": "start https",
-			"detail": "webpack-dev-server --https"
+			"detail": "webpack-dev-server --https",
+			"dependsOn": [
+				"liveserver"
+			]
+		},
+		{
+			"label": "liveserver",
+			"command": "${command:extension.liveServer.goOnline}"
 		}
 	]
 }
