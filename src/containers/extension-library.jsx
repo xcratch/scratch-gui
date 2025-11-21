@@ -112,30 +112,26 @@ const translations = {
 
 /**
  * Holds the preloaded extensions
- * @type {Array<{entry: Object, blockClass: Object}>?}
+ * @type {Array<{entry: Object, blockClass: Object|null, url: string,
+ * isSeparate: boolean, blockClassContextKey?: string}>}
  */
 let preloadedExtensions = [];
 let preloaded = false;
 
 /**
  * Load preloaded extensions
- * @returns {Promise<Array<{entry: object, blockClass: object}>>} - Preloaded extensions
+ * @returns {Promise<Array<object>>} Preloaded extensions
  */
 const loadModules = async () => {
-    if (preloaded) {
-        return preloadedExtensions;
-    }
-
-    // Set flag immediately to prevent concurrent calls
-    preloaded = true;
-
     try {
         let extensions = [];
         try {
             // Check if preload.json exists at compile time and load it.
-            const preloadContext = import.meta.webpackContext(
+            const preloadContext = require.context(
                 '../../preload',
-                {regExp: /^\.\/preload\.json$/, mode: 'lazy'}
+                false,
+                /^\.\/preload\.json$/,
+                'lazy'
             );
             if (preloadContext.keys().includes('./preload.json')) {
                 const preloadJson = await preloadContext('./preload.json');
@@ -151,13 +147,15 @@ const loadModules = async () => {
             return preloadedExtensions;
         }
 
-        // Create webpack context for preload directory
-        let preloadContext = null;
+        // Create webpack context for preload directory (both entry.mjs and extension.mjs)
+        let preloadModulesContext = null;
         try {
-            preloadContext = import.meta.webpackContext('/preload', {
-                recursive: true,
-                regExp: /extension\.mjs$/
-            });
+            preloadModulesContext = require.context(
+                '../../preload',
+                true,
+                /\/(entry|extension)\.mjs$/,
+                'lazy'
+            );
         } catch (contextError) {
             return preloadedExtensions;
         }
@@ -167,18 +165,66 @@ const loadModules = async () => {
             return preloadedExtensions;
         }
 
+        // Group files by directory
+        const filesByDirectory = new Map();
+        preloadModulesContext.keys().forEach(key => {
+            const match = key.match(/^\.\/(.+)\/(entry|extension)\.mjs$/);
+            if (match) {
+                const [, dirPath, fileType] = match;
+                if (!filesByDirectory.has(dirPath)) {
+                    filesByDirectory.set(dirPath, {});
+                }
+                filesByDirectory.get(dirPath)[fileType] = key;
+            }
+        });
+
         // Load each extension module using webpack context
         const modules = await Promise.all(
             extensions.map(async ext => {
                 try {
-                    // Convert file path to webpack context key
-                    const contextKey = `./${ext.path}`;
-                    const module = await preloadContext(contextKey);
-                    return {
-                        entry: module.entry,
-                        blockClass: module.blockClass,
-                        url: ext.url
-                    };
+                    // Extract directory path from ext.path
+                    const pathMatch = ext.path.match(/^(.+)\/(entry|extension)\.mjs$/);
+                    if (!pathMatch) {
+                        log.warn(`Invalid extension path format: ${ext.path}`);
+                        return null;
+                    }
+                    
+                    const dirPath = pathMatch[1];
+                    const filesInDir = filesByDirectory.get(dirPath);
+                    
+                    if (!filesInDir) {
+                        log.warn(`No files found for extension: ${ext.path}`);
+                        return null;
+                    }
+
+                    // Determine if integrated or separate type
+                    const hasEntry = !!filesInDir.entry;
+                    const hasExtension = !!filesInDir.extension;
+                    const isSeparate = hasEntry && hasExtension;
+
+                    if (isSeparate) {
+                        // Separate type: load only entry.mjs
+                        const entryModule = await preloadModulesContext(filesInDir.entry);
+                        return {
+                            entry: entryModule.entry,
+                            blockClass: null,
+                            url: ext.url,
+                            isSeparate: true,
+                            blockClassContextKey: filesInDir.extension
+                        };
+                    }
+                    if (hasExtension) {
+                        // Integrated type: load extension.mjs with both entry and blockClass
+                        const extensionModule = await preloadModulesContext(filesInDir.extension);
+                        return {
+                            entry: extensionModule.entry,
+                            blockClass: extensionModule.blockClass,
+                            url: ext.url,
+                            isSeparate: false
+                        };
+                    }
+                    log.warn(`Invalid extension structure for: ${ext.path}`);
+                    return null;
                 } catch (error) {
                     log.warn(`Failed to load extension ${ext.url}:`, error);
                     return null;
@@ -187,7 +233,7 @@ const loadModules = async () => {
         );
 
         // Filter out failed loads
-        preloadedExtensions = modules.filter(module => module && module.entry && module.blockClass);
+        preloadedExtensions = modules.filter(module => module && module.entry);
 
         // Sort by name
         preloadedExtensions.sort((a, b) => {
@@ -200,7 +246,7 @@ const loadModules = async () => {
             return nameA.localeCompare(nameB);
         });
 
-        // Register all preloaded extensions
+        // Register all preloaded extensions to the library
         preloadedExtensions.forEach(({entry, url}) => {
             entry.category = 'preloaded';
             entry.extensionURL = url;
@@ -245,15 +291,18 @@ class ExtensionLibrary extends React.PureComponent {
         ]);
         
         if (!preloaded) {
-        // Set preloaded extensions into VM for fallback when loading extension class from URL.
-            preloadedExtensions.forEach(({entry, blockClass}) => {
-                this.props.vm.extensionManager
-                    .registerExtensionBlock(entry, blockClass, true); // true: preloaded
+            // Set preloaded extensions into VM for fallback when loading extension class from URL.
+            // Only register integrated type extensions (those with blockClass already loaded)
+            preloadedExtensions.forEach(({entry, blockClass, isSeparate, url}) => {
+                if (!isSeparate && blockClass) {
+                    log.info(`Registering preloaded integrated extension: ${entry.extensionId} with URL: ${url}`);
+                    this.props.vm.extensionManager
+                        .registerExtensionBlock(entry, blockClass, true); // true: preloaded
+                }
             });
             // Clear preloadedExtensions to avoid duplicate registration.
             preloaded = true;
         }
-        // Load extension class from the URL.
         // Workaround to avoid official translation process.
         Object.assign(
             this.props.intl.messages,
@@ -261,7 +310,7 @@ class ExtensionLibrary extends React.PureComponent {
         );
     }
 
-    handleItemSelect (item) {
+    async handleItemSelect (item) {
         if (item.disabled) {
             return;
         }
@@ -272,6 +321,43 @@ class ExtensionLibrary extends React.PureComponent {
                 this.props.onCategorySelected(id);
                 return Promise.resolve();
             }
+            
+            // Check if this is a preloaded extension
+            const preloadedExt = preloadedExtensions.find(ext => ext.entry.extensionId === id);
+            
+            if (preloadedExt && preloadedExt.isSeparate && preloadedExt.blockClassContextKey) {
+                // Separate type preloaded extension
+                try {
+                    // Load blockClass dynamically for separate type extension
+                    const preloadContext = require.context(
+                        '../../preload',
+                        true,
+                        /\/(entry|extension)\.mjs$/,
+                        'lazy'
+                    );
+                    
+                    const extensionModule = await preloadContext(preloadedExt.blockClassContextKey);
+                    
+                    if (extensionModule && extensionModule.blockClass) {
+                        // Register the blockClass to VM
+                        this.props.vm.extensionManager
+                            .registerExtensionBlock(preloadedExt.entry, extensionModule.blockClass);
+                        this.props.onCategorySelected(id);
+                    } else {
+                        throw new Error('blockClass not found in extension module');
+                    }
+                } catch (error) {
+                    log.warn(`Failed to dynamically load blockClass for ${id}:`, error);
+                    // Fallback to loading from URL
+                    return this.props.vm.extensionManager.loadExtensionURL(url)
+                        .then(() => {
+                            this.props.onCategorySelected(id);
+                        });
+                }
+                return;
+            }
+            
+            // Not a preloaded extension - load from URL
             return this.props.vm.extensionManager.loadExtensionURL(url)
                 .then(() => {
                     this.props.onCategorySelected(id);
